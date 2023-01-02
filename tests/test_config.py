@@ -5,7 +5,7 @@ from mllib.config.config import *
 
 class TestConfig(unittest.TestCase):
     def test_config(self):
-        cfg = get_config("tests/data/default.json")
+        cfg = get_config("tests/data/default.yaml")
         self.assertEqual(cfg.model.name, 'resnet50')
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, fields
 import json
 from typing import get_type_hints
+import yaml
 
 @dataclass
 class RecursiveDataclass:
@@ -52,8 +53,8 @@ class config(RecursiveDataclass):
     algo: algo_cfg= algo_cfg()
     # optimizer:optimizer_cfg=optimizer_cfg()
 
-def get_config(config_path:str="mllib/config/default.json"):
-    with open(config_path, 'r') as f:
-        dct = json.load(f)
+def get_config(config_path:str="mllib/config/default.yaml"):
+    with open(config_path) as file:
+        dct = yaml.safe_load(file)
         cfg = config.from_dict(dct)
     return cfg

@@ -5,7 +5,7 @@ from mllib.src.dataset import *
 #python -m unittest tests.test_dataset
 class TestDataset(unittest.TestCase):
     def test_dataloader(self):
-        cfg = get_config("tests/data/default.json")
+        cfg = get_config("tests/data/default.yaml")
         train_loader, eval_loader  = get_dataloader(cfg)
         print(train_loader.dataset)
         print(len(train_loader.dataset))

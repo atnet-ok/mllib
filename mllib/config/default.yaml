@@ -1,0 +1,17 @@
+algo:
+  device: cuda:0
+  epoch: 30
+  lr: 0.0001
+  name: SimpleDeepLerning
+  optimizer: sgd
+  wd: 0.0001
+dataset:
+  batch_size_eval: 32
+  batch_size_train: 32
+  class_num: 10
+  data_size: 28
+  name: MNIST
+model:
+  in_chans: 1
+  name: resnet50
+  pre_train: true
