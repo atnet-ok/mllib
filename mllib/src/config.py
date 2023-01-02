@@ -51,7 +51,6 @@ class config(RecursiveDataclass):
     model: model_cfg = model_cfg()
     dataset: dataset_cfg = dataset_cfg()
     train: train_cfg= train_cfg()
-    # optimizer:optimizer_cfg=optimizer_cfg()
 
 def get_config(config_path:str="mllib/config/default.yaml"):
     with open(config_path) as file:

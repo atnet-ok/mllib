@@ -1,7 +1,7 @@
 import unittest
 from mllib.src.config import * 
 from mllib.src.trainer import *
-from mllib.src.dataset import *
+from mllib.src.data import *
 
 #python -m unittest tests.test_trainer
 

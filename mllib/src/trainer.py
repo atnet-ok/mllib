@@ -1,7 +1,7 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
 
-from mllib.src.dataset import *
+from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from torch.utils.data import Dataset, DataLoader
@@ -36,9 +36,7 @@ class DeepLerning(Trainer):
         self.amp =False #True
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-
     def update(self) -> dict:
-
 
         self.model.train()
         loss_total = 0
@@ -105,7 +103,6 @@ class Sklern(Trainer):
     def train(self) -> dict:
         pass  
 
-
     def test(self) -> dict:
         pass  
 
@@ -125,8 +122,8 @@ trainer_dct = {
 
 def get_trainer(cfg):
     if cfg.train.name in trainer_dct.keys():
-        algo = trainer_dct[cfg.train.name](cfg)
+        trainer = trainer_dct[cfg.train.name](cfg)
     else:
         raise Exception(f'{cfg.train.name} in not implemented')
     
-    return algo
+    return trainer
