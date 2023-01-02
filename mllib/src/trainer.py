@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
-from torch.utils.data import Dataset, DataLoader
 import torch
 import numpy as np
 
@@ -27,7 +26,7 @@ class DeepLerning(Trainer):
         optimizer, model = get_optimizer(cfg, model)
         self.dl_train, self.dl_eval = get_dataloader(cfg)
 
-        self.class_num = cfg.dataset.class_num
+        self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
         self.device = cfg.train.device
         self.optimizer = optimizer
@@ -96,9 +95,8 @@ class DeepLerning(Trainer):
             #print(f"metrics:{metrics}")
 
 class Sklern(Trainer):
-    def __init__(self,model) -> None:
+    def __init__(self,cfg) -> None:
         super().__init__()
-        self.model = model
 
     def train(self) -> dict:
         pass  

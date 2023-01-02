@@ -16,6 +16,6 @@ if __name__=='__main__':
     cfg = get_config(
         config_path=config_path
         )
-    algo = get_trainer(cfg)
-    algo.train()
-    algo.test()
+    trainer = get_trainer(cfg)
+    trainer.train()
+    trainer.test()

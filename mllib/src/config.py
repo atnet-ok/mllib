@@ -1,7 +1,7 @@
-from dataclasses import dataclass, fields
-import json
+from dataclasses import dataclass, fields, asdict
 from typing import get_type_hints
-import yaml
+from mllib.src.utils import *
+import os
 
 @dataclass
 class RecursiveDataclass:
@@ -39,7 +39,7 @@ class model_cfg(RecursiveDataclass):
     in_chans:int=1
 
 @dataclass
-class dataset_cfg(RecursiveDataclass):
+class data_cfg(RecursiveDataclass):
     name:str="MNIST"
     batch_size_train:int = 32
     batch_size_eval:int = 16
@@ -49,11 +49,24 @@ class dataset_cfg(RecursiveDataclass):
 @dataclass
 class config(RecursiveDataclass):
     model: model_cfg = model_cfg()
-    dataset: dataset_cfg = dataset_cfg()
+    data: data_cfg = data_cfg()
     train: train_cfg= train_cfg()
 
 def get_config(config_path:str="mllib/config/default.yaml"):
-    with open(config_path) as file:
-        dct = yaml.safe_load(file)
-        cfg = config.from_dict(dct)
+    dct = yaml2dct(config_path)
+    cfg = config.from_dict(dct)
     return cfg
+
+def save_config(cfg:config, save_dir:str="mllib/config/database"):
+    now = date2str()
+    dct = asdict(cfg)
+    save_path = os.path.join(
+            save_dir,
+            f"{now}.yaml"
+            )
+    dct2yaml(
+        dct, 
+        save_path
+        )
+
+    return save_path

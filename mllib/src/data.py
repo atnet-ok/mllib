@@ -15,9 +15,9 @@ buildin_dataset = {
 
 def get_dataset(cfg):
 
-    if cfg.dataset.name in buildin_dataset.keys():
+    if cfg.data.name in buildin_dataset.keys():
         root = "/mnt/d/data"
-        dataset= buildin_dataset[cfg.dataset.name](
+        dataset= buildin_dataset[cfg.data.name](
             root=root,
             transform=transforms.ToTensor(),
             download = True
@@ -31,7 +31,7 @@ def get_dataset(cfg):
             )
 
     else:
-        raise Exception(f'{cfg.dataset.name} in not implemented')
+        raise Exception(f'{cfg.data.name} in not implemented')
 
     return dataset_train, dataset_eval
 
@@ -39,8 +39,8 @@ def get_dataloader(cfg):
     
     dataset_train, dataset_eval = get_dataset(cfg)
 
-    train_batch_size = cfg.dataset.batch_size_train
-    eval_batch_size = cfg.dataset.batch_size_eval
+    train_batch_size = cfg.data.batch_size_train
+    eval_batch_size = cfg.data.batch_size_eval
 
     train_loader = DataLoader(
         dataset_train, 

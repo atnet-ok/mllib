@@ -3,14 +3,15 @@ import torch.optim as optim
 def get_optimizer(cfg,model):
     opt = cfg.train.optimizer
     lr = cfg.train.lr
+    weight_decay = cfg.train.wd
 
     if opt == 'sgd':
         #optimizer = optim.SGD(model.parameters(), lr=cfg['lr'], momentum=cfg['momentum'])
         optimizer = optim.SGD(
             model.parameters(), 
             lr=lr , 
-            momentum=0,#0.9, 
-            weight_decay=0#1e-4
+            momentum=0, #0.9, 
+            weight_decay=weight_decay #1e-4
             )
     elif opt == 'adam':
         optimizer = optim.Adam(
@@ -55,4 +56,4 @@ def get_scheduler(cfg,optimizer):
     elif sche=='none':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=cfg['epoch'], gamma=0.1)
 
-    return scheduler,optimizer
+    return scheduler, optimizer
