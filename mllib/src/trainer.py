@@ -44,7 +44,7 @@ class DeepLerning(Trainer):
             self.model.train()
         else:
             self.model.eval()
-            
+
         loss_dct = {"loss_total":0}
         y_true = []
         y_pred = []
@@ -55,7 +55,7 @@ class DeepLerning(Trainer):
             if len(label.shape) == 1:
                 label = torch.eye(self.class_num)[label]
             self.optimizer.zero_grad()
-            data=data.to(self.device)
+            data=data.to(torch.float32).to(self.device)
             label=label.to(self.device)
 
             with torch.set_grad_enabled(train_mode):

@@ -2,9 +2,23 @@ from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import ImageNet,MNIST,FashionMNIST,Caltech101
 from torchvision import transforms
-import torch
 from torch.utils.data import random_split
-from PIL import Image
+import numpy as np
+
+class CWRUsyn2real(Dataset):
+    def __init__(self) -> None:
+        super().__init__()
+        self.X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
+        self.y = np.load("data/CWRU_syn2real/preprocessed/yreallDEenv.npy")
+        pass
+
+    def __getitem__(self, index):
+        data = self.X[index][np.newaxis,:]
+        label = self.y[index]
+        return data, label
+
+    def __len__(self):
+        return self.y.shape[0]
 
 buildin_dataset = {
     "FashionMNIST":FashionMNIST,
@@ -15,14 +29,14 @@ buildin_dataset = {
 
 def get_dataset(cfg):
 
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, ), (0.5, ))
-            ]
-            )
 
     if cfg.data.name in buildin_dataset.keys():
+        transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, ), (0.5, ))
+                ]
+                )
         root = "/mnt/d/data"
         dataset= buildin_dataset[cfg.data.name](
             root=root,
@@ -34,7 +48,22 @@ def get_dataset(cfg):
         val_size = len(dataset) - train_size
         dataset_train, dataset_eval= random_split(
             dataset, 
-            [train_size, val_size]
+            [
+                train_size, 
+                val_size
+                ]
+            )
+
+    elif cfg.data.name =="CWRUsyn2real":
+        dataset = CWRUsyn2real()
+        train_size = int(0.8 * len(dataset))
+        val_size = len(dataset) - train_size
+        dataset_train, dataset_eval= random_split(
+            dataset, 
+            [
+                train_size, 
+                val_size
+                ]
             )
 
     else:
