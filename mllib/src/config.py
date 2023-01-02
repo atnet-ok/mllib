@@ -29,9 +29,10 @@ class train_cfg(RecursiveDataclass):
     optimizer:str="sgd"
     lr:float=1e-4
     wd:float=1e-4
+    momentum:float=0.9
     device:str="cuda:0"
     amp:bool=True
-    test:str="hoge"
+    scheduler:str="none"
 
 @dataclass
 class model_cfg(RecursiveDataclass):

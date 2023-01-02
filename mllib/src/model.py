@@ -126,7 +126,7 @@ class CNN1d(nn.Module):
 def get_model(cfg):
     if cfg.model.name in timm.list_models():
         model = TimmClassifier(
-            model_name=cfg.model.name,
+            model_name = cfg.model.name,
             class_num = cfg.data.class_num,
             pre_train = cfg.model.pre_train,
             in_chans = cfg.model.in_chans

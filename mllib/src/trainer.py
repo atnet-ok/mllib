@@ -27,6 +27,7 @@ class DeepLerning(Trainer):
         model = get_model(cfg)
         optimizer, model = get_optimizer(cfg, model)
         self.dl_train, self.dl_eval = get_dataloader(cfg)
+        self.scheduler = get_scheduler(cfg,optimizer)
 
         self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
@@ -86,11 +87,14 @@ class DeepLerning(Trainer):
             print(f"--------------------------------------")
             print(f"Epoch {epoch+1}")
             train_dct = self._update(self.dl_train, train_mode=True)
+            self.scheduler.step(epoch+1)
             eval_dct = self._update(self.dl_eval, train_mode=False)
             for key,value in train_dct.items():
-                print(f"{key}_train:{value}")
+                if key in ["accuracy","loss_total"]:
+                    print(f"{key}_train:{value}")
             for key,value in eval_dct .items():
-                print(f"{key}_eval:{value}")
+                if key in ["accuracy","loss_total"]:
+                    print(f"{key}_eval:{value}")
 
     def test(self) -> dict:
         eval_dict = self._update(self.dl_eval, train_mode=False)

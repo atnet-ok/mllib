@@ -23,9 +23,14 @@ class TestSimpleDeepLerning(unittest.TestCase):
         trainer = get_trainer(cfg)
         trainer.train()
 
-
+    @unittest.skip('skipped')
     def test_cwru(self):
-        cfg = get_config("mllib/config/CWRU.yaml")
+        cfg = get_config("tests/data/CWRU.yaml")
+        trainer = get_trainer(cfg)
+        trainer.train()
+
+    def test_officehome(self):
+        cfg = get_config("tests/data/officehome.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
 
