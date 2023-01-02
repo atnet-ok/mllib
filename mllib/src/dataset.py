@@ -1,34 +1,33 @@
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Dataset
-from torchvision.datasets import ImageNet,MNIST,FashionMNIST
+from torchvision.datasets import ImageNet,MNIST,FashionMNIST,Caltech101
 from torchvision import transforms
 import torch
+from torch.utils.data import random_split
 from PIL import Image
+
+buildin_dataset = {
+    "FashionMNIST":FashionMNIST,
+    "MNIST":MNIST,
+    "Caltech101":Caltech101,
+    "ImageNet":ImageNet
+}
 
 def get_dataset(cfg):
 
-    if cfg.dataset.name=="FashionMNIST":
-        dataset_train= FashionMNIST(
-            root="data/",
+    if cfg.dataset.name in buildin_dataset.keys():
+        root = "/mnt/d/data"
+        dataset= buildin_dataset[cfg.dataset.name](
+            root=root,
             transform=transforms.ToTensor(),
-            train=True
-            )
-        dataset_eval= FashionMNIST(
-            root="data/",
-            transform=transforms.ToTensor(),
-            train=False
+            download = True
             )
 
-    elif cfg.dataset.name=="MNIST":
-        dataset_train= MNIST(
-            root="data/",
-            transform=transforms.ToTensor(),
-            train=True
-            )
-        dataset_eval= MNIST(
-            root="data/",
-            transform=transforms.ToTensor(),
-            train=False
+        train_size = int(0.8 * len(dataset))
+        val_size = len(dataset) - train_size
+        dataset_train, dataset_eval= random_split(
+            dataset, 
+            [train_size, val_size]
             )
 
     return dataset_train, dataset_eval

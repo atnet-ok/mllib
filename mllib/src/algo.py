@@ -3,8 +3,9 @@ from abc import ABCMeta, abstractmethod
 
 from mllib.src.model import *
 from mllib.src.optimizer import *
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset, DataLoader
 import torch
+import numpy as np
 
 class Algorithm(metaclass=ABCMeta):
 
@@ -101,6 +102,15 @@ class Sklern(Algorithm):
 
     def test(self, data_loader:DataLoader) -> dict:
         pass  
+
+    def dataset2np(self,dataset):
+        data_s = []
+        label_s = []
+        for i in range(dataset.__len__()):
+            data,label = dataset.__getitem__(i)
+            data_s.append(data)
+            label_s.append(label)
+        return np.array(data_s) , np.array(label_s) 
 
 def get_algo(cfg):
     if cfg.algo.name=="SimpleDeepLerning":

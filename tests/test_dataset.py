@@ -1,5 +1,5 @@
 import unittest
-from mllib.config.config import * 
+from mllib.src.config import * 
 from mllib.src.dataset import * 
 
 #python -m unittest tests.test_dataset
