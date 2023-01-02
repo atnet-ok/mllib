@@ -30,6 +30,7 @@ class train_cfg(RecursiveDataclass):
     lr:float=1e-4
     wd:float=1e-4
     device:str="cuda:0"
+    amp:bool=True
     test:str="hoge"
 
 @dataclass

@@ -4,10 +4,12 @@ from abc import ABCMeta, abstractmethod
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
+from sklearn.metrics import classification_report
 import torch
 import numpy as np
-
-
+import logging
+ 
+logger = logging.getLogger('LoggingTest')
 
 class Trainer(metaclass=ABCMeta):
 
@@ -29,82 +31,76 @@ class DeepLerning(Trainer):
         self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
         self.device = cfg.train.device
+        self.amp =cfg.train.amp #True
+
         self.optimizer = optimizer
         self.model = model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
-        self.amp =False #True
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-    def update(self) -> dict:
+    def _update(self, dataloader:DataLoader ,train_mode:bool=True) -> dict:
 
-        self.model.train()
-        loss_total = 0
-        size = len(self.dl_train.dataset)
-        num_batches = len(self.dl_train)
+        if train_mode:
+            self.model.train()
+        else:
+            self.model.eval()
+            
+        loss_dct = {"loss_total":0}
+        y_true = []
+        y_pred = []
 
-        for data, label in self.dl_train:
+        num_batches = len(dataloader)
+
+        for data, label in dataloader:
             if len(label.shape) == 1:
-                label = torch.eye(self.class_num)[label].to(self.device)
+                label = torch.eye(self.class_num)[label]
             self.optimizer.zero_grad()
             data=data.to(self.device)
             label=label.to(self.device)
 
-            with torch.cuda.amp.autocast(enabled=self.amp):
-                y, _ = self.model(data)
-                loss = self.criterion(label,y)
+            with torch.set_grad_enabled(train_mode):
+                with torch.cuda.amp.autocast(enabled=(self.amp and train_mode)):
+                    y, _ = self.model(data)
+                    loss = self.criterion(y,label)
 
-            # self.scaler.scale(loss).backward()
-            # self.scaler.step(self.optimizer)
-            # self.scaler.update()
-            loss.backward()
-            self.optimizer.zero_grad()
-            self.optimizer.step()
-            loss_total += loss.item()
+            if train_mode:
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
 
-        loss_total = loss_total/num_batches
-        
-        return loss_total
+            loss_dct['loss_total'] += loss.item()
+            y_true.extend(list(label.detach().argmax(dim=1).cpu().numpy()))
+            y_pred.extend(list(y.detach().argmax(dim=1).cpu().numpy()))
 
-    def test(self) -> dict:
-        self.model.eval()
-        metrics = 0
-        size = len(self.dl_eval.dataset)
-        num_batches = len(self.dl_eval)
-
-        with torch.no_grad():
-            for data, label in self.dl_eval:
-                if len(label.shape) == 1:
-                    label = torch.eye(self.class_num)[label].to(self.device)
-                self.optimizer.zero_grad()
-                data=data.to(self.device)
-                label=label.to(self.device)
-                y, _ = self.model(data)
-                loss = self.criterion(label,y)
-            loss_total += loss.item()
-
-        loss_total = loss_total/num_batches
-        return metrics
+        loss_dct['loss_total'] = loss_dct['loss_total']/num_batches
+        metrics_dict = classification_report(
+            y_true, 
+            y_pred, 
+            output_dict=True
+            )
+        metrics_dict.update(loss_dct)
+        return metrics_dict
 
     def train(self) -> dict:
         for epoch in range(self.epoch):
             print(f"--------------------------------------")
             print(f"Epoch {epoch+1}")
-            loss = self.update()
-            #metrics = self.test()
-            print(f"loss:{loss}")
-            #print(f"metrics:{metrics}")
-
-class Sklern(Trainer):
-    def __init__(self,cfg) -> None:
-        super().__init__()
-
-    def train(self) -> dict:
-        pass  
+            train_dct = self._update(self.dl_train, train_mode=True)
+            eval_dct = self._update(self.dl_eval, train_mode=False)
+            for key,value in train_dct.items():
+                print(f"{key}_train:{value}")
+            for key,value in eval_dct .items():
+                print(f"{key}_eval:{value}")
 
     def test(self) -> dict:
-        pass  
+        eval_dict = self._update(self.dl_eval, train_mode=False)
+        return eval_dict
 
-    def dataset2np(self,dataset):
+class Sklern(Trainer):
+    def __init__(self, cfg) -> None:
+        super().__init__()
+
+    def _dataset2np(self,dataset):
         data_s = []
         label_s = []
         for i in range(dataset.__len__()):
@@ -112,6 +108,12 @@ class Sklern(Trainer):
             data_s.append(data)
             label_s.append(label)
         return np.array(data_s) , np.array(label_s) 
+
+    def train(self) -> dict:
+        pass  
+
+    def test(self) -> dict:
+        pass  
 
 trainer_dct = {
     "DeepLerning":DeepLerning,

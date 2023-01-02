@@ -15,11 +15,18 @@ buildin_dataset = {
 
 def get_dataset(cfg):
 
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, ), (0.5, ))
+            ]
+            )
+
     if cfg.data.name in buildin_dataset.keys():
         root = "/mnt/d/data"
         dataset= buildin_dataset[cfg.data.name](
             root=root,
-            transform=transforms.ToTensor(),
+            transform=transform,
             download = True
             )
 

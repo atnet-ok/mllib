@@ -9,7 +9,6 @@ if __name__=='__main__':
         '--cfg_path', 
         default="mllib/config/default.yaml", 
         type=str, 
-        nargs='+',
         help='path to config file.'
         )
     config_path=parser.cfg_path
@@ -17,5 +16,5 @@ if __name__=='__main__':
         config_path=config_path
         )
     trainer = get_trainer(cfg)
-    trainer.train()
-    trainer.test()
+    model = trainer.train()
+    metrics = trainer.test()

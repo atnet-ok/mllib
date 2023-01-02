@@ -1,4 +1,5 @@
 from torch import nn
+import torch.nn.functional as F
 import timm
 
 class TimmClassifier(nn.Module):
@@ -24,20 +25,24 @@ class TimmClassifier(nn.Module):
 
 class TestNet(nn.Module):
     def __init__(self):
-        super().__init__()
-        self.flatten = nn.Flatten()
-        self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
-            nn.ReLU(),
-            nn.Linear(512, 512),
-            nn.ReLU(),
-            nn.Linear(512, 10)
-        )
+        super(TestNet, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, 3) # 28x28x32 -> 26x26x32
+        self.conv2 = nn.Conv2d(32, 64, 3) # 26x26x64 -> 24x24x64 
+        self.pool = nn.MaxPool2d(2, 2) # 24x24x64 -> 12x12x64
+        self.dropout1 = nn.Dropout2d()
+        self.fc1 = nn.Linear(12 * 12 * 64, 128)
+        self.dropout2 = nn.Dropout2d()
+        self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
-        x = self.flatten(x)
-        logits = self.linear_relu_stack(x)
-        return logits ,x
+        x = F.relu(self.conv1(x))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = self.dropout1(x)
+        x = x.view(-1, 12 * 12 * 64)
+        x = F.relu(self.fc1(x))
+        x = self.dropout2(x)
+        y = self.fc2(x)
+        return y, x
 
 def get_model(cfg):
     if cfg.model.name in timm.list_models():
