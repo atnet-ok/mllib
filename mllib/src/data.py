@@ -25,8 +25,8 @@ class CWRUsyn2real(Dataset):
         pass
 
     def __getitem__(self, index):
-        data = self.X[index][np.newaxis,:]
-        label = self.y[index]
+        data = self.X[index] #[np.newaxis,:]
+        label = int(self.y[index])
         return data, label
 
     def __len__(self):

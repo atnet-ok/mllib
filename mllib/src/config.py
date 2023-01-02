@@ -1,26 +1,6 @@
 from dataclasses import dataclass, fields, asdict
-from typing import get_type_hints
 from mllib.src.utils import *
 import os
-
-@dataclass
-class RecursiveDataclass:
-    pass
-
-    @classmethod
-    def from_dict(cls, src: dict):
-        kwargs = dict()
-        field_dict= {field.name: field for field in fields(cls)}
-        field_type_dict: dict[str, type] = get_type_hints(cls)
-        for src_key, src_value in src.items():
-            assert src_key in field_dict, "Invalid Data Structure"
-            field = field_dict[src_key]
-            field_type = field_type_dict[field.name]
-            if issubclass(field_type, RecursiveDataclass):
-                kwargs[src_key] = field_type.from_dict(src_value)
-            else:
-                kwargs[src_key] = src_value
-        return cls(**kwargs)
 
 @dataclass
 class train_cfg(RecursiveDataclass):
@@ -47,6 +27,8 @@ class data_cfg(RecursiveDataclass):
     batch_size_eval:int = 16
     class_num:int = 10
     data_size:int = 224 
+    domain_src:str = None
+    domain_trg:str = None
 
 @dataclass
 class config(RecursiveDataclass):

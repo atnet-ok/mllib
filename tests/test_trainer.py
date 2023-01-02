@@ -3,9 +3,10 @@ from mllib.src.config import *
 from mllib.src.trainer import *
 from mllib.src.data import *
 
-# python -m unittest tests.test_trainer
+# python -m unittest tests.test_trainer.TestDeepLerning
+# python -m unittest tests.test_trainer.TestSKLearn
 
-class TestSimpleDeepLerning(unittest.TestCase):
+class TestDeepLerning(unittest.TestCase):
     @unittest.skip('skipped')
     def test_init(self):
         cfg = get_config()
@@ -25,7 +26,7 @@ class TestSimpleDeepLerning(unittest.TestCase):
 
     @unittest.skip('skipped')
     def test_cwru(self):
-        cfg = get_config("tests/data/CWRU.yaml")
+        cfg = get_config("tests/data/cwru.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
 
@@ -33,6 +34,17 @@ class TestSimpleDeepLerning(unittest.TestCase):
         cfg = get_config("tests/data/officehome.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
+
+
+class TestSKLearn(unittest.TestCase):
+    def test_hoge(self):
+        cfg = get_config("tests/data/sklearn.yaml")
+        trainer = get_trainer(cfg)
+        trainer.train()
+        trainer.test()
+
+
+        pass
 
 if __name__ == '__main__':
     unittest.main()

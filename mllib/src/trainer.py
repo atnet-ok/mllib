@@ -4,14 +4,19 @@ from abc import ABCMeta, abstractmethod
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
+from mllib.src.logger import *
 from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestClassifier
 import torch
 import numpy as np
 import logging
+import warnings
  
 logger = logging.getLogger('LoggingTest')
 
 class Trainer(metaclass=ABCMeta):
+    def __init__(self) -> None:
+        warnings.simplefilter('ignore', DeprecationWarning)
 
     @abstractmethod
     def train(self) -> dict:
@@ -27,14 +32,13 @@ class DeepLerning(Trainer):
         model = get_model(cfg)
         optimizer, model = get_optimizer(cfg, model)
         self.dl_train, self.dl_eval = get_dataloader(cfg)
-        self.scheduler = get_scheduler(cfg,optimizer)
+        self.scheduler,self.optimizer = get_scheduler(cfg,optimizer)
 
         self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
         self.device = cfg.train.device
         self.amp =cfg.train.amp #True
 
-        self.optimizer = optimizer
         self.model = model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
@@ -74,35 +78,33 @@ class DeepLerning(Trainer):
             y_pred.extend(list(y.detach().argmax(dim=1).cpu().numpy()))
 
         loss_dct['loss_total'] = loss_dct['loss_total']/num_batches
-        metrics_dict = classification_report(
-            y_true, 
-            y_pred, 
-            output_dict=True
-            )
-        metrics_dict.update(loss_dct)
-        return metrics_dict
+        metrics_dict = calc_metrics(y_true,y_pred,loss_dct)
+
 
     def train(self) -> dict:
         for epoch in range(self.epoch):
             print(f"--------------------------------------")
             print(f"Epoch {epoch+1}")
-            train_dct = self._update(self.dl_train, train_mode=True)
+            print(f"training...")
+            self._update(self.dl_train, train_mode=True)
             self.scheduler.step(epoch+1)
-            eval_dct = self._update(self.dl_eval, train_mode=False)
-            for key,value in train_dct.items():
-                if key in ["accuracy","loss_total"]:
-                    print(f"{key}_train:{value}")
-            for key,value in eval_dct .items():
-                if key in ["accuracy","loss_total"]:
-                    print(f"{key}_eval:{value}")
+            print(f"evaluating...")
+            self._update(self.dl_eval, train_mode=False)
+ 
 
     def test(self) -> dict:
         eval_dict = self._update(self.dl_eval, train_mode=False)
         return eval_dict
 
-class Sklern(Trainer):
+class SKLearn(Trainer):
     def __init__(self, cfg) -> None:
         super().__init__()
+        if cfg.model.name == "RandomForestClassifier":
+            self.model = RandomForestClassifier()
+        
+        dataset_train, dataset_eval = get_dataset(cfg)
+        self.X_train, self.y_train = self._dataset2np(dataset_train)
+        self.X_eval, self.y_eval = self._dataset2np(dataset_eval)
 
     def _dataset2np(self,dataset):
         data_s = []
@@ -114,14 +116,21 @@ class Sklern(Trainer):
         return np.array(data_s) , np.array(label_s) 
 
     def train(self) -> dict:
-        pass  
+        print(f"training...")
+        self.model.fit(self.X_train, self.y_train)
+        y_pred = self.model.predict(self.X_train)
+        y_true = self.y_train
+        metrics_dict = calc_metrics(y_true,y_pred)
 
     def test(self) -> dict:
-        pass  
+        print(f"evaluating...")
+        y_pred = self.model.predict(self.X_eval)
+        y_true = self.y_eval
+        metrics_dict = calc_metrics(y_true,y_pred)
 
 trainer_dct = {
     "DeepLerning":DeepLerning,
-    "Sklern":Sklern
+    "SKLearn":SKLearn
 }
 
 def get_trainer(cfg):

@@ -55,13 +55,13 @@ def get_scheduler(cfg,optimizer):
     if sche=='cosine_warmup':
         from timm.scheduler import CosineLRScheduler
         scheduler = CosineLRScheduler(
-                                    optimizer, 
-                                    t_initial=int(epoch/4) , 
-                                    lr_min=lr*1e-1, 
-                                    warmup_t=5, 
-                                    warmup_lr_init=lr*1e-1, 
-                                    warmup_prefix=True
-                                    )
+                optimizer, 
+                t_initial=epoch , 
+                lr_min=lr*1e-1, 
+                warmup_t=5, 
+                warmup_lr_init=lr*1e-1, 
+                warmup_prefix=True
+                )
     elif sche=='cosine':
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, eta_min=1e-4, T_max= epoch)
     elif sche=='step':
