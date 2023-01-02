@@ -1,13 +1,16 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
 
+from mllib.src.dataset import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from torch.utils.data import Dataset, DataLoader
 import torch
 import numpy as np
 
-class Algorithm(metaclass=ABCMeta):
+
+
+class Trainer(metaclass=ABCMeta):
 
     @abstractmethod
     def train(self) -> dict:
@@ -17,11 +20,12 @@ class Algorithm(metaclass=ABCMeta):
     def test(self) -> dict:
         pass  
 
-class SimpleDeepLerning(Algorithm):
+class DeepLerning(Trainer):
     def __init__(self, cfg) -> None:
         super().__init__()
         model = get_model(cfg)
         optimizer, model = get_optimizer(cfg, model)
+        self.dl_train, self.dl_eval = get_dataloader(cfg)
 
         self.class_num = cfg.dataset.class_num
         self.epoch = cfg.algo.epoch
@@ -33,14 +37,15 @@ class SimpleDeepLerning(Algorithm):
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
 
-    def update(self, data_loader:DataLoader) -> dict:
+    def update(self) -> dict:
+
 
         self.model.train()
         loss_total = 0
-        size = len(data_loader.dataset)
-        num_batches = len(data_loader)
+        size = len(self.dl_train.dataset)
+        num_batches = len(self.dl_train)
 
-        for data, label in data_loader:
+        for data, label in self.dl_train:
             if len(label.shape) == 1:
                 label = torch.eye(self.class_num)[label].to(self.device)
             self.optimizer.zero_grad()
@@ -63,14 +68,14 @@ class SimpleDeepLerning(Algorithm):
         
         return loss_total
 
-    def test(self, data_loader:DataLoader) -> dict:
+    def test(self) -> dict:
         self.model.eval()
         metrics = 0
-        size = len(data_loader.dataset)
-        num_batches = len(data_loader)
+        size = len(self.dl_eval.dataset)
+        num_batches = len(self.dl_eval)
 
         with torch.no_grad():
-            for data, label in data_loader:
+            for data, label in self.dl_eval:
                 if len(label.shape) == 1:
                     label = torch.eye(self.class_num)[label].to(self.device)
                 self.optimizer.zero_grad()
@@ -91,7 +96,7 @@ class SimpleDeepLerning(Algorithm):
             print(f"loss:{loss}")
             #print(f"metrics:{metrics}")
 
-class Sklern(Algorithm):
+class Sklern(Trainer):
     def __init__(self,model) -> None:
         super().__init__()
         self.model = model
@@ -112,7 +117,12 @@ class Sklern(Algorithm):
             label_s.append(label)
         return np.array(data_s) , np.array(label_s) 
 
-def get_algo(cfg):
-    if cfg.algo.name=="SimpleDeepLerning":
-        algo = SimpleDeepLerning(cfg)
+trainer_dct = {
+    "DeepLerning":DeepLerning,
+    "Sklern":Sklern
+}
+
+def get_trainer(cfg):
+    if cfg.algo.name in trainer_dct.keys():
+        algo = trainer_dct[cfg.algo.name]
     return algo

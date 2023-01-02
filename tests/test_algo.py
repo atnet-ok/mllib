@@ -1,6 +1,6 @@
 import unittest
 from mllib.src.config import * 
-from mllib.src.algo import *
+from mllib.src.trainer import *
 from mllib.src.dataset import *
 
 #python -m unittest tests.test_algo
