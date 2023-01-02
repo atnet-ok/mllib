@@ -1,8 +1,8 @@
 import torch.optim as optim
 
 def get_optimizer(cfg,model):
-    opt = cfg.algo.optimizer
-    lr = cfg.algo.lr
+    opt = cfg.train.optimizer
+    lr = cfg.train.lr
 
     if opt == 'sgd':
         #optimizer = optim.SGD(model.parameters(), lr=cfg['lr'], momentum=cfg['momentum'])

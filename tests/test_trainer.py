@@ -3,26 +3,24 @@ from mllib.src.config import *
 from mllib.src.trainer import *
 from mllib.src.dataset import *
 
-#python -m unittest tests.test_algo
+#python -m unittest tests.test_trainer
 
 class TestSimpleDeepLerning(unittest.TestCase):
     @unittest.skip('skipped')
     def test_init(self):
         cfg = get_config()
-        algo = get_algo(cfg)
+        trainer = get_trainer(cfg)
 
     @unittest.skip('skipped')
     def test_update(self):
         cfg = get_config("tests/data/default.yaml")
-        algo = get_algo(cfg)
-        train_loader, eval_loader = get_dataloader(cfg)
-        algo.update(train_loader)
+        trainer = get_trainer(cfg)
+        trainer.update()
 
     def test_train(self):
         cfg = get_config("tests/data/default.yaml")
-        algo = get_algo(cfg)
-        train_loader, eval_loader = get_dataloader(cfg)
-        algo.train( train_loader, eval_loader)
+        trainer = get_trainer(cfg)
+        trainer.train()
 
 if __name__ == '__main__':
     unittest.main()

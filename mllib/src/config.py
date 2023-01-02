@@ -23,7 +23,7 @@ class RecursiveDataclass:
         return cls(**kwargs)
 
 @dataclass
-class algo_cfg(RecursiveDataclass):
+class train_cfg(RecursiveDataclass):
     name: str="SimpleDeepLerning"
     epoch:int =30
     optimizer:str="sgd"
@@ -50,7 +50,7 @@ class dataset_cfg(RecursiveDataclass):
 class config(RecursiveDataclass):
     model: model_cfg = model_cfg()
     dataset: dataset_cfg = dataset_cfg()
-    algo: algo_cfg= algo_cfg()
+    train: train_cfg= train_cfg()
     # optimizer:optimizer_cfg=optimizer_cfg()
 
 def get_config(config_path:str="mllib/config/default.yaml"):

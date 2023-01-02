@@ -28,8 +28,8 @@ class DeepLerning(Trainer):
         self.dl_train, self.dl_eval = get_dataloader(cfg)
 
         self.class_num = cfg.dataset.class_num
-        self.epoch = cfg.algo.epoch
-        self.device = cfg.algo.device
+        self.epoch = cfg.train.epoch
+        self.device = cfg.train.device
         self.optimizer = optimizer
         self.model = model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
@@ -88,11 +88,12 @@ class DeepLerning(Trainer):
         loss_total = loss_total/num_batches
         return metrics
 
-    def train(self, train_loader, test_loader) -> dict:
+    def train(self) -> dict:
         for epoch in range(self.epoch):
-            print(f"Epoch {epoch+1}\n-------------------------------")
-            loss = self.update(train_loader)
-            #metrics = self.test(test_loader)
+            print(f"--------------------------------------")
+            print(f"Epoch {epoch+1}")
+            loss = self.update()
+            #metrics = self.test()
             print(f"loss:{loss}")
             #print(f"metrics:{metrics}")
 
@@ -101,11 +102,11 @@ class Sklern(Trainer):
         super().__init__()
         self.model = model
 
-    def train(self, data_loader:DataLoader) -> dict:
+    def train(self) -> dict:
         pass  
 
 
-    def test(self, data_loader:DataLoader) -> dict:
+    def test(self) -> dict:
         pass  
 
     def dataset2np(self,dataset):
@@ -123,6 +124,9 @@ trainer_dct = {
 }
 
 def get_trainer(cfg):
-    if cfg.algo.name in trainer_dct.keys():
-        algo = trainer_dct[cfg.algo.name]
+    if cfg.train.name in trainer_dct.keys():
+        algo = trainer_dct[cfg.train.name](cfg)
+    else:
+        raise Exception(f'{cfg.train.name} in not implemented')
+    
     return algo

@@ -30,6 +30,9 @@ def get_dataset(cfg):
             [train_size, val_size]
             )
 
+    else:
+        raise Exception(f'{cfg.dataset.name} in not implemented')
+
     return dataset_train, dataset_eval
 
 def get_dataloader(cfg):
