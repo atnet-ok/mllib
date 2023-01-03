@@ -1,8 +1,7 @@
 train:
   name: SKLearn
+  seed: 42
 data:
-  batch_size_eval: 128
-  batch_size_train: 64
   class_num: 10
   data_size: 1000
   name: CWRUsyn2real

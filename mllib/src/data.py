@@ -14,26 +14,39 @@ import os
 from mllib.src.preprocess import get_transform
 
 class CWRUsyn2real(Dataset):
-    def __init__(self,domain='real') -> None:
+    def __init__(self,domain='real',seed=42,is_train=True) -> None:
         super().__init__()
         if domain == 'real':
-            self.X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
-            self.y = np.load("data/CWRU_syn2real/preprocessed/yreallDEenv.npy")
+            X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
+            y = np.load("data/CWRU_syn2real/preprocessed/yreallDEenv.npy")
         elif domain == 'syn':
-            self.X = np.load('data/CWRU_syn2real/preprocessed/XsynallDEenv.npy')
-            self.y = np.load('data/CWRU_syn2real/preprocessed/ysynallDEenv.npy')
-        pass
+            X = np.load('data/CWRU_syn2real/preprocessed/XsynallDEenv.npy')
+            y = np.load('data/CWRU_syn2real/preprocessed/ysynallDEenv.npy')
+        
+        X_train, X_eval, y_train, y_eval = train_test_split(
+                                                    X, 
+                                                    y, 
+                                                    stratify=y,
+                                                    test_size=0.2, 
+                                                    random_state=seed
+                                                    )
+        if is_train:
+            self.X = X_train
+            self.y = y_train
+        else:
+            self.X = X_eval
+            self.y = y_eval  
 
     def __getitem__(self, index):
         data = self.X[index] #[np.newaxis,:]
-        label = int(self.y[index])
+        label = self.y[index]
         return data, label
 
     def __len__(self):
         return self.y.shape[0]
 
 class OfficeHome(Dataset):
-    def __init__(self, img_size, domain="Art", is_train=True, root = "/mnt/d/data/OfficeHomeDataset/") -> None:
+    def __init__(self, img_size, domain="Art", is_train=True, root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
         super().__init__()
         df = pd.DataFrame()
         df['path'] = glob(root + "/**/**/*.jpg")
@@ -46,7 +59,7 @@ class OfficeHome(Dataset):
         train_df, test_df = train_test_split(
             df,  
             test_size=0.2, 
-            random_state=0, 
+            random_state=seed, 
             stratify=df["class"]
         )
         if is_train:
@@ -112,19 +125,16 @@ def get_dataset(cfg):
             )
 
     elif cfg.data.name =="CWRUsyn2real":
-        dataset = CWRUsyn2real()
-        train_size = int(0.8 * len(dataset))
-        val_size = len(dataset) - train_size
-        dataset_train, dataset_eval= random_split(
-            dataset, 
-            [
-                train_size, 
-                val_size
-                ]
-            )
+        dataset_train = CWRUsyn2real(
+            domain='real',
+            is_train=True
+        )
+        dataset_eval = CWRUsyn2real(
+            domain='real',
+            is_train=False
+        )
 
     elif cfg.data.name =="OfficeHome":
-        
         dataset_train = OfficeHome(
             img_size=cfg.data.data_size,
             is_train=True

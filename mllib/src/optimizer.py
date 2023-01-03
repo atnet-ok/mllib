@@ -1,4 +1,6 @@
 import torch.optim as optim
+from torch.optim.lr_scheduler import CosineAnnealingLR,StepLR
+from timm.scheduler import CosineLRScheduler
 
 def get_optimizer(cfg,model):
     opt = cfg.train.optimizer
@@ -17,8 +19,9 @@ def get_optimizer(cfg,model):
         optimizer = optim.Adam(
             model.parameters(), 
             lr=lr ,
-            #eps=cfg['eps'],
-            #betas=(cfg['b0'],cfg['b1'])
+            betas=(0.9, 0.999), 
+            eps=1e-08, 
+            weight_decay=weight_decay #1e-4
             )
     elif opt == 'radam':
         optimizer = optim.RAdam(
@@ -53,7 +56,6 @@ def get_scheduler(cfg,optimizer):
     lr = cfg.train.lr
     
     if sche=='cosine_warmup':
-        from timm.scheduler import CosineLRScheduler
         scheduler = CosineLRScheduler(
                 optimizer, 
                 t_initial=epoch , 
@@ -63,10 +65,13 @@ def get_scheduler(cfg,optimizer):
                 warmup_prefix=True
                 )
     elif sche=='cosine':
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, eta_min=1e-4, T_max= epoch)
+        scheduler = CosineAnnealingLR(
+            optimizer, 
+            eta_min=1e-4, 
+            T_max= epoch)
     elif sche=='step':
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+        scheduler = StepLR(optimizer, step_size=7, gamma=0.1)
     elif sche=='none':
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=epoch, gamma=0.1)
+        scheduler = StepLR(optimizer, step_size=epoch, gamma=0.1)
 
     return scheduler, optimizer

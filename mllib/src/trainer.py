@@ -1,25 +1,25 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
-
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from mllib.src.logger import *
-from sklearn.metrics import classification_report
-from sklearn.ensemble import RandomForestClassifier
 import torch
 import numpy as np
-import logging
 import warnings
- 
-logger = logging.getLogger('LoggingTest')
 
 class Trainer(metaclass=ABCMeta):
-    def __init__(self) -> None:
+    def __init__(self, cfg, logger, model_trained) -> None:
         warnings.simplefilter('ignore', DeprecationWarning)
+        warnings.simplefilter('ignore', UserWarning)
+        if model_trained:
+            self.model = load_model(model_trained)
+        else:
+            self.model = get_model(cfg)
+        self.logger = logger
 
     @abstractmethod
-    def train(self) -> dict:
+    def train(self) -> object:
         pass  
 
     @abstractmethod
@@ -27,23 +27,23 @@ class Trainer(metaclass=ABCMeta):
         pass  
 
 class DeepLerning(Trainer):
-    def __init__(self, cfg) -> None:
-        super().__init__()
-        model = get_model(cfg)
-        optimizer, model = get_optimizer(cfg, model)
+    def __init__(self, cfg, logger, model_trained=None) -> None:
+        super().__init__(cfg, logger, model_trained)
+
+        self.optimizer, self.model = get_optimizer(cfg, self.model)
         self.dl_train, self.dl_eval = get_dataloader(cfg)
-        self.scheduler,self.optimizer = get_scheduler(cfg,optimizer)
+        self.scheduler, self.optimizer = get_scheduler(cfg, self.optimizer)
 
         self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
         self.device = cfg.train.device
-        self.amp =cfg.train.amp #True
+        self.amp = cfg.train.amp #True
 
-        self.model = model.to(self.device)
+        self.model = self.model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-    def _update(self, dataloader:DataLoader ,train_mode:bool=True) -> dict:
+    def _update(self, dataloader:DataLoader ,train_mode:bool=True, epoch =None) -> dict:
 
         if train_mode:
             self.model.train()
@@ -72,36 +72,36 @@ class DeepLerning(Trainer):
                 self.scaler.scale(loss).backward()
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
+                self.scheduler.step(epoch+1)
 
             loss_dct['loss_total'] += loss.item()
             y_true.extend(list(label.detach().argmax(dim=1).cpu().numpy()))
             y_pred.extend(list(y.detach().argmax(dim=1).cpu().numpy()))
 
         loss_dct['loss_total'] = loss_dct['loss_total']/num_batches
-        metrics_dict = calc_metrics(y_true,y_pred,loss_dct)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,loss_dct,epoch)
 
 
     def train(self) -> dict:
         for epoch in range(self.epoch):
-            print(f"--------------------------------------")
-            print(f"Epoch {epoch+1}")
-            print(f"training...")
-            self._update(self.dl_train, train_mode=True)
-            self.scheduler.step(epoch+1)
-            print(f"evaluating...")
-            self._update(self.dl_eval, train_mode=False)
+            self.logger.log(f"--------------------------------------")
+            self.logger.log(f"Epoch {epoch+1}")
+            self.logger.log(f"training...")
+            self._update(self.dl_train, True, epoch)
+            self.logger.log(f"evaluating...")
+            self._update(self.dl_eval, False, epoch)
+
+        return self.model
  
 
     def test(self) -> dict:
-        eval_dict = self._update(self.dl_eval, train_mode=False)
-        return eval_dict
+        metrics_dict = self._update( self.dl_eval, False)
+        return metrics_dict
 
 class SKLearn(Trainer):
-    def __init__(self, cfg) -> None:
-        super().__init__()
-        if cfg.model.name == "RandomForestClassifier":
-            self.model = RandomForestClassifier()
-        
+    def __init__(self, cfg, logger, model_trained=None) -> None:
+        super().__init__(cfg, logger, model_trained)
+
         dataset_train, dataset_eval = get_dataset(cfg)
         self.X_train, self.y_train = self._dataset2np(dataset_train)
         self.X_eval, self.y_eval = self._dataset2np(dataset_eval)
@@ -116,26 +116,29 @@ class SKLearn(Trainer):
         return np.array(data_s) , np.array(label_s) 
 
     def train(self) -> dict:
-        print(f"training...")
+        self.logger.log(f"training...")
         self.model.fit(self.X_train, self.y_train)
         y_pred = self.model.predict(self.X_train)
         y_true = self.y_train
-        metrics_dict = calc_metrics(y_true,y_pred)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred)
+
+        return self.model
 
     def test(self) -> dict:
-        print(f"evaluating...")
+        self.logger.log(f"evaluating...")
         y_pred = self.model.predict(self.X_eval)
         y_true = self.y_eval
-        metrics_dict = calc_metrics(y_true,y_pred)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred)
+        return metrics_dict
 
 trainer_dct = {
     "DeepLerning":DeepLerning,
     "SKLearn":SKLearn
 }
 
-def get_trainer(cfg):
+def get_trainer(cfg,logger):
     if cfg.train.name in trainer_dct.keys():
-        trainer = trainer_dct[cfg.train.name](cfg)
+        trainer = trainer_dct[cfg.train.name](cfg, logger, cfg.model.model_trained)
     else:
         raise Exception(f'{cfg.train.name} in not implemented')
     
