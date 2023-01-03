@@ -43,7 +43,7 @@ class DeepLerning(Trainer):
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-    def _update(self, epoch, dataloader:DataLoader ,train_mode:bool=True) -> dict:
+    def _update(self, dataloader:DataLoader ,train_mode:bool=True, epoch =None) -> dict:
 
         if train_mode:
             self.model.train()
@@ -87,15 +87,15 @@ class DeepLerning(Trainer):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
             self.logger.log(f"training...")
-            self._update(epoch, self.dl_train, train_mode=True)
+            self._update(self.dl_train, True, epoch)
             self.logger.log(f"evaluating...")
-            self._update(epoch, self.dl_eval, train_mode=False)
+            self._update(self.dl_eval, False, epoch)
 
         return self.model
  
 
     def test(self) -> dict:
-        metrics_dict = self._update(self.dl_eval, train_mode=False)
+        metrics_dict = self._update( self.dl_eval, False)
         return metrics_dict
 
 class SKLearn(Trainer):
