@@ -7,4 +7,4 @@ data:
   name: CWRUsyn2real
 model:
   name: RandomForestClassifier
-  model_trained: tests/data/sklearn.pkl
+  model_trained: tests/data/model/sklearn_train.pkl

@@ -6,7 +6,7 @@ from mllib.src.data import *
 class TestDataset(unittest.TestCase):
     @unittest.skip('skipped')
     def test_default(self):
-        cfg = get_config("tests/data/default.yaml")
+        cfg = get_config("tests/data/config/default.yaml")
         train_loader, eval_loader  = get_dataloader(cfg)
         print(train_loader.dataset)
         print(len(train_loader.dataset))
@@ -24,7 +24,7 @@ class TestDataset(unittest.TestCase):
 
     @unittest.skip('skipped')
     def test_cwru(self):
-        cfg = get_config("tests/data/cwru.yaml")
+        cfg = get_config("tests/data/config/cwru.yaml")
         train_loader, eval_loader  = get_dataloader(cfg)
         print(train_loader.dataset)
         print(len(train_loader.dataset))
@@ -41,7 +41,7 @@ class TestDataset(unittest.TestCase):
         # self.assertEqual(model, cfg.model.name)
 
     def test_officehome(self):
-        cfg = get_config("tests/data/officehome.yaml")
+        cfg = get_config("tests/data/config/officehome.yaml")
         dataset_train, dataset_eval  = get_dataset(cfg)
         print(dataset_train.__len__())
         print(dataset_train.__getitem__(0))

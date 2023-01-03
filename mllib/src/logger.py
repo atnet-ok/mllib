@@ -3,9 +3,9 @@ import logging
 import torch
 import pickle
 import os
-# from cloudpickle import dump, load
+from cloudpickle import dump, load
 # from joblib import dump, load
-from pickle import dump, load
+# from pickle import dump, load
 
 
 def calc_metrics(y_pred,y_true,additional_metrics:dict=None):

@@ -15,24 +15,24 @@ class TestDeepLerning(unittest.TestCase):
 
     @unittest.skip('skipped')
     def test_update(self):
-        cfg = get_config("tests/data/default.yaml")
+        cfg = get_config("tests/data/config/default.yaml")
         trainer = get_trainer(cfg)
         trainer.update()
 
     @unittest.skip('skipped')
     def test_default(self):
-        cfg = get_config("tests/data/default.yaml")
+        cfg = get_config("tests/data/config/default.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
 
     @unittest.skip('skipped')
     def test_cwru(self):
-        cfg = get_config("tests/data/cwru.yaml")
+        cfg = get_config("tests/data/config/cwru.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
 
     def test_officehome(self):
-        cfg = get_config("tests/data/officehome.yaml")
+        cfg = get_config("tests/data/config/officehome.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
 
@@ -44,7 +44,7 @@ class TestSKLearn(unittest.TestCase):
             #"GradientBoostingClassifier",
             #"LogisticRegression"
             ]
-        cfg = get_config("tests/data/sklearn.yaml")
+        cfg = get_config("tests/data/config/sklearn.yaml")
         logger = start_logging()
 
         for model in model_s:

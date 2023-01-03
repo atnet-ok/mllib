@@ -40,7 +40,7 @@ class model_cfg(RecursiveDataclass):
     name: str="tf_efficientnet_b7"
     pre_train:bool =True
     in_chans:int=1
-    model_trained:str=None
+    model_trained:str=''
 
 @dataclass
 class data_cfg(RecursiveDataclass):
