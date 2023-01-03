@@ -1,7 +1,12 @@
+import sys
+sys.path.append(__file__.replace("mllib/run.py",''))
+print(sys.path)
+
 from mllib.src.trainer import *
 from mllib.src.utils import *
+
+
 import argparse
-import os
 
 if __name__=='__main__':
     # recieve args from input
@@ -27,4 +32,4 @@ if __name__=='__main__':
         model = None
         metrics = trainer.test()       
 
-    end_experiment(args,logger, model, metrics)
+    end_experiment(args, logger, model, metrics)

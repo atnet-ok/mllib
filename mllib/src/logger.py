@@ -23,7 +23,7 @@ def start_logging(experiment_name='test'):
     logger = logging.getLogger(experiment_name)
     return logger
 
-def save_model(model,cfg_dir, run_id):
+def save_model(model, model_dir, run_id):
 
     model_path=os.path.join(model_dir, run_id+'.pkl')
     with open(model_path, 'wb') as f:

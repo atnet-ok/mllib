@@ -2,7 +2,7 @@ import unittest
 from mllib.src.config import * 
 from mllib.src.data import * 
 
-# python -m unittest tests.test_dataset
+# python -m unittest tests.test_data
 class TestDataset(unittest.TestCase):
     @unittest.skip('skipped')
     def test_default(self):
