@@ -1,7 +1,8 @@
 **/__pycache__/
-data/**
-model/**
-config/database/*
+data/*
+model/*
+log/*
+config/*
 tests/data/log/*
 tests/data/model/*
 test.py
