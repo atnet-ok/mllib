@@ -53,7 +53,5 @@ class TestSKLearn(unittest.TestCase):
             trainer.train()
             trainer.test()
 
-
-
 if __name__ == '__main__':
     unittest.main()

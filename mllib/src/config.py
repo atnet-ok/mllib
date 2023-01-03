@@ -1,7 +1,9 @@
 from dataclasses import dataclass, fields, asdict
+from typing import get_type_hints
 from mllib.src.utils import *
+
 import os
-import yaml
+
 
 # https://zenn.dev/yosemat/articles/2fce02d2ad0794
 @dataclass
@@ -58,24 +60,13 @@ class config(RecursiveDataclass):
     data: data_cfg = data_cfg()
     train: train_cfg= train_cfg()
 
-def yaml2dct(yaml_path):
-    with open(yaml_path) as file:
-        dct = yaml.safe_load(file)
-    return dct
-
-def dct2yaml(dct, yaml_path):
-    with open(yaml_path, 'w') as file:
-        yaml.dump(dct, file)
-
 def get_config(config_path:str="config/default.yaml"):
     dct = yaml2dct(config_path)
     cfg = config.from_dict(dct)
     return cfg
 
-def save_config(cfg:config, save_dir:str="config/database"):
-    now = date2str()
+def save_config(cfg:config, config_id:str=date2str(),save_dir='config/database'):
     dct = asdict(cfg)
-    save_path = os.path.join(save_dir, f"{now}.yaml")
+    save_path = os.path.join(save_dir, f"{config_id}.yaml")
     dct2yaml(dct, save_path)
-
     return save_path

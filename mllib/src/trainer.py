@@ -8,10 +8,10 @@ import torch
 import numpy as np
 import warnings
 
-
 class Trainer(metaclass=ABCMeta):
     def __init__(self, cfg, logger, model_trained) -> None:
         warnings.simplefilter('ignore', DeprecationWarning)
+        warnings.simplefilter('ignore', UserWarning)
         if model_trained:
             self.model = load_model(model_trained)
         else:

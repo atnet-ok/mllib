@@ -16,7 +16,7 @@ class TestRun(unittest.TestCase):
         subprocess.run(command)
 
     def test_test_deep(self):
-        # command = 'python mllib/run.py -id deep_train -m train -model tests/data/model -cfg tests/data/config'.split(' ')
-        # subprocess.run(command)
+        command = 'python mllib/run.py -id deep_train -m train -model tests/data/model -cfg tests/data/config'.split(' ')
+        subprocess.run(command)
         command = 'python mllib/run.py -id deep_test -m test -cfg tests/data/config'.split(' ')
         subprocess.run(command)

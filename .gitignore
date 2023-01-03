@@ -1,6 +1,6 @@
 **/__pycache__/
 data/**
 model/**
-mllib/config/database/*
+config/database/*
 test.py
 **/*.pkl

@@ -4,8 +4,20 @@ import torch
 import pickle
 import os
 from cloudpickle import dump, load
+from mllib.src.config import *
 # from joblib import dump, load
 # from pickle import dump, load
+
+def start_experiment(args):
+    config_path=os.path.join(args.cfg_dir, args.run_id+'.yaml')
+    logger = start_logging(args.experiment_name)
+    cfg = get_config(config_path=config_path)
+    return cfg, logger
+
+def end_experiment(args, logger, model, metrics):
+    if model:
+        save_model(model, args.model_dir, args.run_id)
+
 
 
 def calc_metrics(y_pred,y_true,additional_metrics:dict=None):
