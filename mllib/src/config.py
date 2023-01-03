@@ -60,12 +60,12 @@ class config(RecursiveDataclass):
     data: data_cfg = data_cfg()
     train: train_cfg= train_cfg()
 
-def get_config(config_path:str="config/default.yaml"):
+def get_config(config_path:str="config/000_default.yaml"):
     dct = yaml2dct(config_path)
     cfg = config.from_dict(dct)
     return cfg
 
-def save_config(cfg:config, config_id:str=date2str(),save_dir='config/database'):
+def save_config(cfg:config, config_id:str=date2str(),save_dir='config/'):
     dct = asdict(cfg)
     save_path = os.path.join(save_dir, f"{config_id}.yaml")
     dct2yaml(dct, save_path)

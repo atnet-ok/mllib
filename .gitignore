@@ -2,5 +2,7 @@
 data/**
 model/**
 config/database/*
+tests/data/log/*
+tests/data/model/*
 test.py
 **/*.pkl

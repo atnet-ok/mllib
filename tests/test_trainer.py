@@ -38,20 +38,26 @@ class TestDeepLerning(unittest.TestCase):
 
 class TestSKLearn(unittest.TestCase):
     def test_sklearn(self):
+        class args:
+             experiment_name = "test"
+             run_id = 'sklearn_train'
+             mode = 'train'
+             cfg_dir = "tests/data/config/"
+             model_dir = "tests/data/model/"
+             log_dir = "tests/data/log/"
         model_s = [
             "RandomForestClassifier",
             #"SVC",
             #"GradientBoostingClassifier",
             #"LogisticRegression"
             ]
-        cfg = get_config("tests/data/config/sklearn.yaml")
-        logger = start_logging()
 
+        cfg, logger = start_experiment(args)
         for model in model_s:
             cfg.model.name = model
             trainer = get_trainer(cfg,logger)
-            trainer.train()
-            trainer.test()
+            _ = trainer.train()
+            _ = trainer.test()
 
 if __name__ == '__main__':
     unittest.main()
