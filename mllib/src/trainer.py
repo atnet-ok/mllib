@@ -138,7 +138,7 @@ trainer_dct = {
 
 def get_trainer(cfg,logger):
     if cfg.train.name in trainer_dct.keys():
-        trainer = trainer_dct[cfg.train.name](cfg,logger)
+        trainer = trainer_dct[cfg.train.name](cfg, logger, cfg.model.model_trained)
     else:
         raise Exception(f'{cfg.train.name} in not implemented')
     

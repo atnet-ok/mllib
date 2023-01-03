@@ -1,6 +1,5 @@
 import sys
 sys.path.append(__file__.replace("mllib/run.py",''))
-print(sys.path)
 
 from mllib.src.trainer import *
 from mllib.src.utils import *
@@ -23,12 +22,14 @@ if __name__=='__main__':
     cfg, logger = start_experiment(args)
 
     # wake up trainer
-    trainer = get_trainer(cfg, logger)
+    
 
     if args.mode == 'train':
+        trainer = get_trainer(cfg, logger)
         model = trainer.train()
         metrics = trainer.test()
-    else:
+    elif args.mode == 'test':
+        trainer = get_trainer(cfg, logger)
         model = None
         metrics = trainer.test()       
 

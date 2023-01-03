@@ -1,0 +1,10 @@
+train:
+  name: SKLearn
+  seed: 42
+data:
+  class_num: 10
+  data_size: 1000
+  name: CWRUsyn2real
+model:
+  name: RandomForestClassifier
+  model_trained: tests/data/sklearn.pkl

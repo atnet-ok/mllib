@@ -27,7 +27,6 @@ def start_experiment(args):
     config_path=os.path.join(args.cfg_dir, args.run_id+'.yaml')
     logger = start_logging(args.experiment_name)
     cfg = get_config(config_path=config_path)
-
     return cfg, logger
 
 def end_experiment(args, logger, model, metrics):
