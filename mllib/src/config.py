@@ -37,21 +37,15 @@ class config(RecursiveDataclass):
     data: data_cfg = data_cfg()
     train: train_cfg= train_cfg()
 
-def get_config(config_path:str="mllib/config/default.yaml"):
+def get_config(config_path:str="config/default.yaml"):
     dct = yaml2dct(config_path)
     cfg = config.from_dict(dct)
     return cfg
 
-def save_config(cfg:config, save_dir:str="mllib/config/database"):
+def save_config(cfg:config, save_dir:str="config/database"):
     now = date2str()
     dct = asdict(cfg)
-    save_path = os.path.join(
-            save_dir,
-            f"{now}.yaml"
-            )
-    dct2yaml(
-        dct, 
-        save_path
-        )
+    save_path = os.path.join(save_dir, f"{now}.yaml")
+    dct2yaml(dct, save_path)
 
     return save_path

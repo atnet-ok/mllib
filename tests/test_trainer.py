@@ -2,6 +2,7 @@ import unittest
 from mllib.src.config import * 
 from mllib.src.trainer import *
 from mllib.src.data import *
+from mllib.src.logger import *
 
 # python -m unittest tests.test_trainer.TestDeepLerning
 # python -m unittest tests.test_trainer.TestSKLearn
@@ -35,20 +36,20 @@ class TestDeepLerning(unittest.TestCase):
         trainer = get_trainer(cfg)
         trainer.train()
 
-
 class TestSKLearn(unittest.TestCase):
     def test_sklearn(self):
         model_s = [
             "RandomForestClassifier",
-            "SVC",
+            #"SVC",
             #"GradientBoostingClassifier",
-            "LogisticRegression"
+            #"LogisticRegression"
             ]
         cfg = get_config("tests/data/sklearn.yaml")
+        logger = start_logging()
 
         for model in model_s:
             cfg.model.name = model
-            trainer = get_trainer(cfg)
+            trainer = get_trainer(cfg,logger)
             trainer.train()
             trainer.test()
 

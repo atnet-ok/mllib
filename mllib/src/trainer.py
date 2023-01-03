@@ -1,27 +1,25 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
-
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from mllib.src.logger import *
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
 import torch
 import numpy as np
-import logging
 import warnings
- 
-logger = logging.getLogger('LoggingTest')
+
 
 class Trainer(metaclass=ABCMeta):
-    def __init__(self) -> None:
+    def __init__(self, cfg, logger, model_trained) -> None:
         warnings.simplefilter('ignore', DeprecationWarning)
+        if model_trained:
+            self.model = load_model(model_trained)
+        else:
+            self.model = get_model(cfg)
+        self.logger = logger
 
     @abstractmethod
-    def train(self) -> dict:
+    def train(self) -> object:
         pass  
 
     @abstractmethod
@@ -29,19 +27,19 @@ class Trainer(metaclass=ABCMeta):
         pass  
 
 class DeepLerning(Trainer):
-    def __init__(self, cfg) -> None:
-        super().__init__()
-        model = get_model(cfg)
-        optimizer, model = get_optimizer(cfg, model)
+    def __init__(self, cfg, logger, model_trained=None) -> None:
+        super().__init__(cfg, logger, model_trained)
+
+        self.optimizer, self.model = get_optimizer(cfg, self.model)
         self.dl_train, self.dl_eval = get_dataloader(cfg)
-        self.scheduler,self.optimizer = get_scheduler(cfg,optimizer)
+        self.scheduler, self.optimizer = get_scheduler(cfg, self.optimizer)
 
         self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
         self.device = cfg.train.device
-        self.amp =cfg.train.amp #True
+        self.amp = cfg.train.amp #True
 
-        self.model = model.to(self.device)
+        self.model = self.model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
@@ -92,28 +90,18 @@ class DeepLerning(Trainer):
             self.scheduler.step(epoch+1)
             print(f"evaluating...")
             self._update(self.dl_eval, train_mode=False)
+
+        return self.model
  
 
     def test(self) -> dict:
-        eval_dict = self._update(self.dl_eval, train_mode=False)
-        return eval_dict
+        metrics_dict = self._update(self.dl_eval, train_mode=False)
+        return metrics_dict
 
 class SKLearn(Trainer):
-    def __init__(self, cfg) -> None:
-        super().__init__()
-        if cfg.model.name == "RandomForestClassifier":
-            self.model = RandomForestClassifier()
-        elif cfg.model.name == "SVC":
-            self.model = SVC()
-        elif cfg.model.name == "GradientBoostingClassifier":
-            self.model = GradientBoostingClassifier(
-                verbose=1
-            )
-        elif cfg.model.name == "LogisticRegression":
-            self.model = LogisticRegression(
-                penalty='l2'
-            )
-        
+    def __init__(self, cfg, logger, model_trained=None) -> None:
+        super().__init__(cfg, logger, model_trained)
+
         dataset_train, dataset_eval = get_dataset(cfg)
         self.X_train, self.y_train = self._dataset2np(dataset_train)
         self.X_eval, self.y_eval = self._dataset2np(dataset_eval)
@@ -134,20 +122,23 @@ class SKLearn(Trainer):
         y_true = self.y_train
         metrics_dict = calc_metrics(y_true,y_pred)
 
+        return self.model
+
     def test(self) -> dict:
         print(f"evaluating...")
         y_pred = self.model.predict(self.X_eval)
         y_true = self.y_eval
         metrics_dict = calc_metrics(y_true,y_pred)
+        return metrics_dict
 
 trainer_dct = {
     "DeepLerning":DeepLerning,
     "SKLearn":SKLearn
 }
 
-def get_trainer(cfg):
+def get_trainer(cfg,logger):
     if cfg.train.name in trainer_dct.keys():
-        trainer = trainer_dct[cfg.train.name](cfg)
+        trainer = trainer_dct[cfg.train.name](cfg,logger)
     else:
         raise Exception(f'{cfg.train.name} in not implemented')
     

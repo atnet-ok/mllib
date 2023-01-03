@@ -1,6 +1,12 @@
 from torch import nn
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
 import torch.nn.functional as F
 import timm
+
+
 
 class TimmClassifier(nn.Module):
     def __init__(self, model_name, class_num, pre_train,in_chans):
@@ -124,24 +130,37 @@ class CNN1d(nn.Module):
 
 
 def get_model(cfg):
-    if cfg.model.name in timm.list_models():
-        model = TimmClassifier(
-            model_name = cfg.model.name,
-            class_num = cfg.data.class_num,
-            pre_train = cfg.model.pre_train,
-            in_chans = cfg.model.in_chans
+    if cfg.train.name == 'DeepLerning':
+        if cfg.model.name in timm.list_models():
+            model = TimmClassifier(
+                model_name = cfg.model.name,
+                class_num = cfg.data.class_num,
+                pre_train = cfg.model.pre_train,
+                in_chans = cfg.model.in_chans
+                )
+        elif cfg.model.name=="TestNet":
+            model = TestNet()
+        elif cfg.model.name=="CNN1d":
+            model = CNN1d(
+                input_channels=cfg.model.in_chans, 
+                num_classes=cfg.data.class_num
+                )
+        else:
+            raise Exception(f'{cfg.model.name} in not implemented')
+
+    elif cfg.train.name == 'SKLearn':
+        if cfg.model.name == "RandomForestClassifier":
+            model = RandomForestClassifier()
+        elif cfg.model.name == "SVC":
+            model = SVC()
+        elif cfg.model.name == "GradientBoostingClassifier":
+            model = GradientBoostingClassifier(
+                verbose=1
             )
-            
-    elif cfg.model.name=="TestNet":
-        model = TestNet()
-
-    elif cfg.model.name=="CNN1d":
-        model = CNN1d(
-            input_channels=cfg.model.in_chans, 
-            num_classes=cfg.data.class_num
+        elif cfg.model.name == "LogisticRegression":
+            model = LogisticRegression(
+                penalty='l2'
             )
-
-    else:
-        raise Exception(f'{cfg.model.name} in not implemented')
-
+        else:
+            raise Exception(f'{cfg.model.name} in not implemented')      
     return model
