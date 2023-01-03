@@ -43,7 +43,7 @@ class DeepLerning(Trainer):
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-    def _update(self, dataloader:DataLoader ,train_mode:bool=True) -> dict:
+    def _update(self, epoch, dataloader:DataLoader ,train_mode:bool=True) -> dict:
 
         if train_mode:
             self.model.train()
@@ -72,13 +72,14 @@ class DeepLerning(Trainer):
                 self.scaler.scale(loss).backward()
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
+                self.scheduler.step(epoch+1)
 
             loss_dct['loss_total'] += loss.item()
             y_true.extend(list(label.detach().argmax(dim=1).cpu().numpy()))
             y_pred.extend(list(y.detach().argmax(dim=1).cpu().numpy()))
 
         loss_dct['loss_total'] = loss_dct['loss_total']/num_batches
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,loss_dct)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,loss_dct,epoch)
 
 
     def train(self) -> dict:
@@ -86,10 +87,9 @@ class DeepLerning(Trainer):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
             self.logger.log(f"training...")
-            self._update(self.dl_train, train_mode=True)
-            self.scheduler.step(epoch+1)
+            self._update(epoch, self.dl_train, train_mode=True)
             self.logger.log(f"evaluating...")
-            self._update(self.dl_eval, train_mode=False)
+            self._update(epoch, self.dl_eval, train_mode=False)
 
         return self.model
  
