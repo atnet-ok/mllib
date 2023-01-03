@@ -37,14 +37,22 @@ class TestDeepLerning(unittest.TestCase):
 
 
 class TestSKLearn(unittest.TestCase):
-    def test_hoge(self):
+    def test_sklearn(self):
+        model_s = [
+            "RandomForestClassifier",
+            "SVC",
+            #"GradientBoostingClassifier",
+            "LogisticRegression"
+            ]
         cfg = get_config("tests/data/sklearn.yaml")
-        trainer = get_trainer(cfg)
-        trainer.train()
-        trainer.test()
+
+        for model in model_s:
+            cfg.model.name = model
+            trainer = get_trainer(cfg)
+            trainer.train()
+            trainer.test()
 
 
-        pass
 
 if __name__ == '__main__':
     unittest.main()

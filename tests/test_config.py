@@ -9,7 +9,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(cfg.model.name, 'resnet50')
 
     def test_crwu(self):
-        cfg = get_config("mllib/config/CWRU.yaml")
+        cfg = get_config("mllib/config/cwru.yaml")
         self.assertEqual(cfg.data.name, 'CWRUsyn2real')
 
 if __name__ == '__main__':

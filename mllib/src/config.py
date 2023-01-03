@@ -5,6 +5,7 @@ import os
 @dataclass
 class train_cfg(RecursiveDataclass):
     name: str="SimpleDeepLerning"
+    seed:int=42
     epoch:int =30
     optimizer:str="sgd"
     lr:float=1e-4

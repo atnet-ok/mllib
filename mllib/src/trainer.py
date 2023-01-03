@@ -5,8 +5,10 @@ from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from mllib.src.logger import *
-from sklearn.metrics import classification_report
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
 import torch
 import numpy as np
 import logging
@@ -101,6 +103,16 @@ class SKLearn(Trainer):
         super().__init__()
         if cfg.model.name == "RandomForestClassifier":
             self.model = RandomForestClassifier()
+        elif cfg.model.name == "SVC":
+            self.model = SVC()
+        elif cfg.model.name == "GradientBoostingClassifier":
+            self.model = GradientBoostingClassifier(
+                verbose=1
+            )
+        elif cfg.model.name == "LogisticRegression":
+            self.model = LogisticRegression(
+                penalty='l2'
+            )
         
         dataset_train, dataset_eval = get_dataset(cfg)
         self.X_train, self.y_train = self._dataset2np(dataset_train)

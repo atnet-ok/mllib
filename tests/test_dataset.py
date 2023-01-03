@@ -24,7 +24,7 @@ class TestDataset(unittest.TestCase):
 
     @unittest.skip('skipped')
     def test_cwru(self):
-        cfg = get_config("tests/data/CWRU.yaml")
+        cfg = get_config("tests/data/cwru.yaml")
         train_loader, eval_loader  = get_dataloader(cfg)
         print(train_loader.dataset)
         print(len(train_loader.dataset))
