@@ -74,19 +74,19 @@ def summary_report(metrics_dict:dict, save_acc_per_class=None):
 
 
 def start_experiment(args):
-    log_path = os.path.join(args.log_dir, args.run_id+'.log')
+    log_path = os.path.join(args.log_dir, args.run_name+'.log')
     logger = MyLogger(args.experiment_name, log_path)
 
-    config_path=os.path.join(args.cfg_dir, args.run_id+'.yaml')
+    config_path=os.path.join(args.cfg_dir, args.run_name+'.yaml')
     cfg = get_config(config_path=config_path)
 
     logger.log('-'*30)
     logger.log('Now Starting '+ args.experiment_name)
-    logger.log('run id is '+ args.run_id)
+    logger.log('run id is '+ args.run_name)
     logger.log(cfg)
 
     mlflow.set_experiment(args.experiment_name)
-    mlflow.start_run(run_name=args.run_id)
+    mlflow.start_run(run_name=args.run_name)
     dct = asdict(cfg)
     for key_0 in dct:
         for key, value in dct[key_0].items():
@@ -96,19 +96,24 @@ def start_experiment(args):
 
 def end_experiment(args,  model, metrics):
     if model:
-        save_model(model, args.model_dir, args.run_id)
+        save_model(model, args.model_dir, args.run_name)
 
+    log_path = os.path.join(args.log_dir, args.run_name+'.log')
+    config_path=os.path.join(args.cfg_dir, args.run_name+'.yaml')
+    mlflow.log_artifact(log_path)
+    mlflow.log_artifact(config_path)
     mlflow.end_run()
     
 
-def save_model(model, model_dir, run_id):
+def save_model(model, model_dir, run_name):
 
-    model_path=os.path.join(model_dir, run_id+'.pkl')
+    model_path=os.path.join(model_dir, run_name+'.pkl')
     with open(model_path, 'wb') as f:
         dump(model, f)
+    mlflow.log_artifact(model_path)
 
 def load_model(model_path):
-
+    mlflow.log_artifact(model_path)
     with open(model_path, 'rb') as f:
         model = load(f)
     return model

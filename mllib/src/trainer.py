@@ -118,14 +118,15 @@ class SKLearn(Trainer):
         self.model.fit(self.X_train, self.y_train)
         y_pred = self.model.predict(self.X_train)
         y_true = self.y_train
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,'train')
+        _ = self.logger.log_metrics(y_true,y_pred,'train')
+        _ = self.test(phase='eval')
 
         return self.model
 
-    def test(self) -> dict:
+    def test(self,phase='test') -> dict:
         y_pred = self.model.predict(self.X_eval)
         y_true = self.y_eval
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,'test')
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 
 trainer_dct = {

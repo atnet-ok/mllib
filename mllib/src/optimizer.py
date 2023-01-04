@@ -60,7 +60,7 @@ def get_scheduler(cfg,optimizer):
                 optimizer, 
                 t_initial=epoch , 
                 lr_min=lr*1e-1, 
-                warmup_t=5, 
+                warmup_t=int(epoch/5), 
                 warmup_lr_init=lr*1e-1, 
                 warmup_prefix=True
                 )

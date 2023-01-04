@@ -18,7 +18,7 @@ def dct2yaml(dct, yaml_path):
 
 def date2str():
     dt_now = datetime.datetime.now()
-    return dt_now.strftime('%Y%m%d_%H%M_%S')
+    return dt_now.strftime('%Y-%m-%d_%H-%M-%S')
 
 def fix_randomness(seed):
     random.seed(seed)

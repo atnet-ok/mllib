@@ -40,7 +40,7 @@ class TestSKLearn(unittest.TestCase):
     def test_sklearn(self):
         class args:
              experiment_name = "test"
-             run_id = 'sklearn_train'
+             run_name = 'sklearn_train'
              mode = 'train'
              cfg_dir = "tests/data/config/"
              model_dir = "tests/data/model/"

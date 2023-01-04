@@ -11,13 +11,13 @@ class TestRun(unittest.TestCase):
 
     #@unittest.skip('skipped')
     def test_test_sklearn(self):
-        command = 'python mllib/run.py -id sklearn_train -m train -model tests/data/model -cfg tests/data/config -log tests/data/log'
+        command = 'python mllib/run.py -run sklearn_train -m train -model tests/data/model -cfg tests/data/config -log tests/data/log'
         subprocess.run(command.split(' '))
-        # command = 'python mllib/run.py -id sklearn_test -m test -cfg tests/data/config -log tests/data/log'
+        # command = 'python mllib/run.py -run sklearn_test -m test -cfg tests/data/config -log tests/data/log'
         # subprocess.run(command.split(' '))
-    #@unittest.skip('skipped')
+    @unittest.skip('skipped')
     def test_test_deep(self):
-        command = 'python mllib/run.py -id deep_train -m train -model tests/data/model -cfg tests/data/config -log tests/data/log'
+        command = 'python mllib/run.py -run deep_train -m train -model tests/data/model -cfg tests/data/config -log tests/data/log'
         subprocess.run(command.split(' '))
-        # command = 'python mllib/run.py -id deep_test -m test -cfg tests/data/config -log tests/data/log'
+        # command = 'python mllib/run.py -run deep_test -m test -cfg tests/data/config -log tests/data/log'
         # subprocess.run(command.split(' '))
