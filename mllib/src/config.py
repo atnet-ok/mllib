@@ -36,7 +36,7 @@ class train_cfg(RecursiveDataclass):
     device:str=None
     amp:bool=None
     scheduler:str=None
-    transfer:bool=None
+    tl_method:str=None # Trasnsfer Learning Method
 @dataclass
 class model_cfg(RecursiveDataclass):
     name: str=None
