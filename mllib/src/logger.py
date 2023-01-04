@@ -103,10 +103,8 @@ def end_experiment(args,  model, metrics):
     mlflow.log_artifact(log_path)
     mlflow.log_artifact(config_path)
     mlflow.end_run()
-    
 
 def save_model(model, model_dir, run_name):
-
     model_path=os.path.join(model_dir, run_name+'.pkl')
     with open(model_path, 'wb') as f:
         dump(model, f)

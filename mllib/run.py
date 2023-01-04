@@ -24,7 +24,7 @@ if __name__=='__main__':
     if args.mode == 'train':
         trainer = get_trainer(cfg, logger)
         model = trainer.train()
-        metrics = trainer.test()
+        metrics = None
     elif args.mode == 'test':
         trainer = get_trainer(cfg, logger)
         model = None

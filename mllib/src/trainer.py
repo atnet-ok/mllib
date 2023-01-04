@@ -40,6 +40,7 @@ class DeepLerning(Trainer):
         self.amp = cfg.train.amp #True
 
         self.model = self.model.to(self.device)
+        #self.model = torch.compile(self.model) #for pytorch 2.0
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
