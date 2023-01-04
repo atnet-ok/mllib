@@ -47,8 +47,10 @@ class DeepLerning(Trainer):
 
         if train_mode:
             self.model.train()
+            phase = 'train'
         else:
             self.model.eval()
+            phase = 'eval'
 
         loss_dct = {"loss_total":0}
         y_true = []
@@ -79,16 +81,14 @@ class DeepLerning(Trainer):
             y_pred.extend(list(y.detach().argmax(dim=1).cpu().numpy()))
 
         loss_dct['loss_total'] = loss_dct['loss_total']/num_batches
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,loss_dct,epoch)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,phase,loss_dct,epoch)
 
 
     def train(self) -> dict:
         for epoch in range(self.epoch):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
-            self.logger.log(f"training...")
             self._update(self.dl_train, True, epoch)
-            self.logger.log(f"evaluating...")
             self._update(self.dl_eval, False, epoch)
 
         return self.model
@@ -116,7 +116,6 @@ class SKLearn(Trainer):
         return np.array(data_s) , np.array(label_s) 
 
     def train(self) -> dict:
-        self.logger.log(f"training...")
         self.model.fit(self.X_train, self.y_train)
         y_pred = self.model.predict(self.X_train)
         y_true = self.y_train
@@ -125,10 +124,9 @@ class SKLearn(Trainer):
         return self.model
 
     def test(self) -> dict:
-        self.logger.log(f"evaluating...")
         y_pred = self.model.predict(self.X_eval)
         y_true = self.y_eval
-        metrics_dict = self.logger.log_metrics(y_true,y_pred)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,'eval')
         return metrics_dict
 
 trainer_dct = {
