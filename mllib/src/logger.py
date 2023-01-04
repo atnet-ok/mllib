@@ -37,17 +37,15 @@ class MyLogger():
             metrics_dict.update(additional_metrics)
 
         for key,value in metrics_dict.items():
-            if key in ['accuracy','loss_total']:
-                key = key + '_' + phase
-                self.log(f"{key}:{value}")
             key = key + '_' + phase
+            if ('accuracy' in key) or ('loss' in key):
+                self.log(f"{key}:{value}")
+
             mlflow.log_metric(key=key,value=value,step=step)
-
-
 
         return metrics_dict
 
-def summary_report(metrics_dict:dict):
+def summary_report(metrics_dict:dict, save_acc_per_class=None):
     summary = dict()
     for key,value in metrics_dict.items():
 
@@ -63,11 +61,14 @@ def summary_report(metrics_dict:dict):
         elif key =='weighted avg':
             pass
         else:
-            for key_t,value_t in value.items():
-                if key_t=='f1-score':
-                    summary.update(
-                        {key+'_'+key_t:value_t}
-                    )       
+            if save_acc_per_class:
+                for key_t,value_t in value.items():
+                    if key_t=='f1-score':
+                        summary.update(
+                            {key+'_'+key_t:value_t}
+                        )      
+            else:
+                pass 
         
     return summary
 

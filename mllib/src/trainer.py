@@ -43,14 +43,13 @@ class DeepLerning(Trainer):
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-    def _update(self, dataloader:DataLoader ,train_mode:bool=True, epoch =None) -> dict:
+    def _update(self, dataloader:DataLoader ,phase:str='train', epoch =None) -> dict:
 
-        if train_mode:
+        if phase == 'train':
             self.model.train()
-            phase = 'train'
+ 
         else:
             self.model.eval()
-            phase = 'eval'
 
         loss_dct = {"loss_total":0}
         y_true = []
@@ -65,12 +64,12 @@ class DeepLerning(Trainer):
             data=data.to(torch.float32).to(self.device)
             label=label.to(self.device)
 
-            with torch.set_grad_enabled(train_mode):
-                with torch.cuda.amp.autocast(enabled=(self.amp and train_mode)):
+            with torch.set_grad_enabled(phase == 'train'):
+                with torch.cuda.amp.autocast(enabled=(self.amp and (phase == 'train'))):
                     y, _ = self.model(data)
                     loss = self.criterion(y,label)
 
-            if train_mode:
+            if phase == 'train':
                 self.scaler.scale(loss).backward()
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
@@ -88,14 +87,14 @@ class DeepLerning(Trainer):
         for epoch in range(self.epoch):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
-            self._update(self.dl_train, True, epoch)
-            self._update(self.dl_eval, False, epoch)
+            self._update(self.dl_train, 'train', epoch)
+            self._update(self.dl_eval, 'eval', epoch)
 
         return self.model
  
 
     def test(self) -> dict:
-        metrics_dict = self._update( self.dl_eval, False)
+        metrics_dict = self._update( self.dl_eval, 'test')
         return metrics_dict
 
 class SKLearn(Trainer):
@@ -119,14 +118,14 @@ class SKLearn(Trainer):
         self.model.fit(self.X_train, self.y_train)
         y_pred = self.model.predict(self.X_train)
         y_true = self.y_train
-        metrics_dict = self.logger.log_metrics(y_true,y_pred)
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,'train')
 
         return self.model
 
     def test(self) -> dict:
         y_pred = self.model.predict(self.X_eval)
         y_true = self.y_eval
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,'eval')
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,'test')
         return metrics_dict
 
 trainer_dct = {

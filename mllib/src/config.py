@@ -26,31 +26,31 @@ class RecursiveDataclass:
 
 @dataclass
 class train_cfg(RecursiveDataclass):
-    name: str="SimpleDeepLerning"
-    seed:int=42
-    epoch:int =30
-    optimizer:str="sgd"
-    lr:float=1e-4
-    wd:float=1e-4
-    momentum:float=0.9
-    device:str="cuda:0"
-    amp:bool=True
-    scheduler:str="none"
+    name: str=None
+    seed:int=None
+    epoch:int =None
+    optimizer:str=None
+    lr:float=None
+    wd:float=None
+    momentum:float=None
+    device:str=None
+    amp:bool=None
+    scheduler:str=None
 
 @dataclass
 class model_cfg(RecursiveDataclass):
-    name: str="tf_efficientnet_b7"
-    pre_train:bool =True
-    in_chans:int=1
-    model_trained:str=''
+    name: str=None
+    pre_train:bool =None
+    in_chans:int=None
+    model_trained:str=None
 
 @dataclass
 class data_cfg(RecursiveDataclass):
-    name:str="MNIST"
-    batch_size_train:int = 32
-    batch_size_eval:int = 16
-    class_num:int = 10
-    data_size:int = 224 
+    name:str=None
+    batch_size_train:int = None
+    batch_size_eval:int = None
+    class_num:int = None
+    data_size:int = None
     domain_src:str = None
     domain_trg:str = None
 
