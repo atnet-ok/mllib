@@ -1,5 +1,6 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
+from adapt.instance_based import TrAdaBoost
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
@@ -31,7 +32,8 @@ class DeepLerning(Trainer):
         super().__init__(cfg, logger, model_trained)
 
         self.optimizer, self.model = get_optimizer(cfg, self.model)
-        self.dl_train, self.dl_eval = get_dataloader(cfg)
+        dataset_train, dataset_eval = get_dataset(cfg)
+        self.dl_train, self.dl_eval = get_dataloader(cfg, dataset_train, dataset_eval)
         self.scheduler, self.optimizer = get_scheduler(cfg, self.optimizer)
 
         self.class_num = cfg.data.class_num
@@ -130,9 +132,55 @@ class SKLearn(Trainer):
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 
+class SKLearnDA(Trainer):
+    def __init__(self, cfg, logger, model_trained=None) -> None:
+        super().__init__(cfg, logger, model_trained)
+
+        dataset_train_src, dataset_eval_src = get_dataset(cfg,cfg.data.src)
+        dataset_train_trg, dataset_eval_trg = get_dataset(cfg,cfg.data.trg)
+
+        self.X_train_src, self.y_train_src = self._dataset2np(dataset_train_src)
+        self.X_eval_src, self.y_eval_src = self._dataset2np(dataset_eval_src)
+        self.X_train_trg, self.y_train_trg = self._dataset2np(dataset_train_trg)
+        self.X_eval_trg, self.y_eval_trg = self._dataset2np(dataset_eval_trg)
+
+        self.model = TrAdaBoost(
+            self.model, 
+            n_estimators=10, 
+            Xt=self.X_train_trg, 
+            yt=self.y_train_trg, 
+            random_state=cfg.train.seed
+        )
+
+    def _dataset2np(self,dataset):
+        data_s = []
+        label_s = []
+        for i in range(dataset.__len__()):
+            data,label = dataset.__getitem__(i)
+            data_s.append(data)
+            label_s.append(label)
+        return np.array(data_s) , np.array(label_s) 
+
+    def train(self) -> dict:
+        self.model.fit(self.X_train_src, self.y_train_src)
+        y_pred = self.model.predict(self.X_train_trg)
+        y_true = self.y_train_trg
+        _ = self.logger.log_metrics(y_true,y_pred,'train')
+        _ = self.test(phase='eval')
+
+        return self.model
+
+    def test(self,phase='test') -> dict:
+        y_pred = self.model.predict(self.X_eval_trg)
+        y_true = self.y_eval_trg
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
+        return metrics_dict
+
+
 trainer_dct = {
     "DeepLerning":DeepLerning,
-    "SKLearn":SKLearn
+    "SKLearn":SKLearn,
+    "SKLearnDA":SKLearnDA
 }
 
 def get_trainer(cfg,logger):

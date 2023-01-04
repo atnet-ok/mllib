@@ -97,9 +97,7 @@ buildin_dataset = {
     "ImageNet":ImageNet
 }
 
-def get_dataset(cfg):
-
-
+def get_dataset(cfg, domain = None):
     if cfg.data.name in buildin_dataset.keys():
         transform = transforms.Compose(
             [
@@ -126,11 +124,11 @@ def get_dataset(cfg):
 
     elif cfg.data.name =="CWRUsyn2real":
         dataset_train = CWRUsyn2real(
-            domain='real',
+            domain= domain if domain else 'real',
             is_train=True
         )
         dataset_eval = CWRUsyn2real(
-            domain='real',
+            domain= domain if domain else 'real',
             is_train=False
         )
 
@@ -149,9 +147,7 @@ def get_dataset(cfg):
 
     return dataset_train, dataset_eval
 
-def get_dataloader(cfg):
-    
-    dataset_train, dataset_eval = get_dataset(cfg)
+def get_dataloader(cfg, dataset_train, dataset_eval):
 
     train_batch_size = cfg.data.batch_size_train
     eval_batch_size = cfg.data.batch_size_eval
