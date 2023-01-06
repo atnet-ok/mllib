@@ -8,3 +8,4 @@ tests/data/log/*
 tests/data/model/*
 test.py
 **/*.pkl
+test*
