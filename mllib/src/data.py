@@ -14,7 +14,7 @@ import os
 from mllib.src.preprocess import get_transform
 
 class CWRUsyn2real(Dataset):
-    def __init__(self,domain='real',seed=42,is_train=True) -> None:
+    def __init__(self,domain='real',is_train=True,seed=42) -> None:
         super().__init__()
         if domain == 'real':
             X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
@@ -125,21 +125,27 @@ def get_dataset(cfg, domain = None):
     elif cfg.data.name =="CWRUsyn2real":
         dataset_train = CWRUsyn2real(
             domain= domain if domain else 'real',
-            is_train=True
+            is_train=True,
+            seed=cfg.train.seed
         )
         dataset_eval = CWRUsyn2real(
             domain= domain if domain else 'real',
-            is_train=False
+            is_train=False,
+            seed=cfg.train.seed
         )
 
     elif cfg.data.name =="OfficeHome":
         dataset_train = OfficeHome(
             img_size=cfg.data.data_size,
-            is_train=True
+            domain=domain if domain else "Art",
+            is_train=True,
+            seed=cfg.train.seed
         )
         dataset_eval = OfficeHome(
             img_size=cfg.data.data_size,
-            is_train=False
+            domain=domain if domain else "Art",
+            is_train=False,
+            seed=cfg.train.seed
         )
 
     else:

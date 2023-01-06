@@ -27,7 +27,7 @@ class Trainer(metaclass=ABCMeta):
     def test(self) -> dict:
         pass  
 
-class DeepLerning(Trainer):
+class DLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
@@ -100,7 +100,7 @@ class DeepLerning(Trainer):
         metrics_dict = self._update( self.dl_eval, 'test')
         return metrics_dict
 
-class SKLearn(Trainer):
+class MLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
@@ -132,7 +132,7 @@ class SKLearn(Trainer):
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 
-class SKLearnDA(Trainer):
+class MLDATrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
@@ -178,9 +178,9 @@ class SKLearnDA(Trainer):
 
 
 trainer_dct = {
-    "DeepLerning":DeepLerning,
-    "SKLearn":SKLearn,
-    "SKLearnDA":SKLearnDA
+    "DLTrainer":DLTrainer,
+    "MLTrainer":MLTrainer,
+    "MLDATrainer":MLDATrainer
 }
 
 def get_trainer(cfg,logger):

@@ -27,6 +27,7 @@ class RecursiveDataclass:
 @dataclass
 class train_cfg(RecursiveDataclass):
     name:str=None
+    task:str=None
     seed:int=None
     epoch:int =None
     optimizer:str=None
@@ -53,6 +54,7 @@ class data_cfg(RecursiveDataclass):
     data_size:int = None
     src:str = None
     trg:str = None
+    test_rate:float= None
 
 @dataclass
 class config(RecursiveDataclass):

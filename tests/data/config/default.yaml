@@ -2,7 +2,7 @@ train:
   device: cuda:0
   epoch: 3
   lr: 0.001
-  name: DeepLerning
+  name: DLTrainer
   optimizer: sgd
   wd: 0.0
   amp: true

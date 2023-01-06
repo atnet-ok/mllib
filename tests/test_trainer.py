@@ -4,10 +4,10 @@ from mllib.src.trainer import *
 from mllib.src.data import *
 from mllib.src.logger import *
 
-# python -m unittest tests.test_trainer.TestDeepLerning
-# python -m unittest tests.test_trainer.TestSKLearn
+# python -m unittest tests.test_trainer.TestDLTrainer
+# python -m unittest tests.test_trainer.TestMLTrainer
 
-class TestDeepLerning(unittest.TestCase):
+class TestDLTrainer(unittest.TestCase):
     @unittest.skip('skipped')
     def test_init(self):
         cfg = get_config()
@@ -36,7 +36,7 @@ class TestDeepLerning(unittest.TestCase):
         trainer = get_trainer(cfg)
         trainer.train()
 
-class TestSKLearn(unittest.TestCase):
+class TestMLTrainer(unittest.TestCase):
     def test_sklearn(self):
         class args:
              experiment_name = "test"
