@@ -148,7 +148,7 @@ def get_model(cfg):
         else:
             raise Exception(f'{cfg.model.name} in not implemented')
 
-    elif cfg.train.name == 'MLTrainer':
+    elif cfg.train.name in ['MLTrainer', 'MLDATrainer']:
         if cfg.model.name == "RandomForestClassifier":
             model = RandomForestClassifier()
         elif cfg.model.name == "SVC":

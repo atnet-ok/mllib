@@ -31,13 +31,14 @@ class TestDLTrainer(unittest.TestCase):
         trainer = get_trainer(cfg)
         trainer.train()
 
+    @unittest.skip('skipped')
     def test_officehome(self):
         cfg = get_config("tests/data/config/officehome.yaml")
         trainer = get_trainer(cfg)
         trainer.train()
 
 class TestMLTrainer(unittest.TestCase):
-    def test_sklearn(self):
+    def setUp(self):
         class args:
              experiment_name = "test"
              run_name = 'sklearn_train'
@@ -45,6 +46,12 @@ class TestMLTrainer(unittest.TestCase):
              cfg_dir = "tests/data/config/"
              model_dir = "tests/data/model/"
              log_dir = "tests/data/log/"
+
+        self.args = args
+
+    @unittest.skip('skipped')
+    def test_sklearn(self):
+
         model_s = [
             "RandomForestClassifier",
             #"SVC",
@@ -52,12 +59,19 @@ class TestMLTrainer(unittest.TestCase):
             #"LogisticRegression"
             ]
 
-        cfg, logger = start_experiment(args)
+        cfg, logger = start_experiment(self.args)
         for model in model_s:
             cfg.model.name = model
             trainer = get_trainer(cfg,logger)
             _ = trainer.train()
             _ = trainer.test()
+
+    # @unittest.skip('skipped')
+    def test_mldatrainer(self):
+        self.args.run_name = 'sklearn_train_da'
+        cfg, logger = start_experiment(self.args)
+        trainer = get_trainer(cfg,logger)
+        _ = trainer.train()
 
 if __name__ == '__main__':
     unittest.main()

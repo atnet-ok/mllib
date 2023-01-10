@@ -1,0 +1,14 @@
+train:
+  name: MLDATrainer
+  task: classification
+  seed: 42
+data:
+  class_num: 10
+  data_size: 1000
+  name: CWRUsyn2real
+  domain_src: syn
+  domain_trg: real
+  eval_rate_src: 0.2
+  eval_rate_trg: 0.9
+model:
+  name: RandomForestClassifier

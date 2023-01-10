@@ -1,10 +1,10 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
-from adapt.instance_based import TrAdaBoost
 from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from mllib.src.logger import *
+from adapt.instance_based import TrAdaBoost
 import torch
 import numpy as np
 import warnings
@@ -136,8 +136,8 @@ class MLDATrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
-        dataset_train_src, dataset_eval_src = get_dataset(cfg,cfg.data.src)
-        dataset_train_trg, dataset_eval_trg = get_dataset(cfg,cfg.data.trg)
+        dataset_train_src, dataset_eval_src = get_dataset(cfg, cfg.data.domain_src, cfg.data.eval_rate_src)
+        dataset_train_trg, dataset_eval_trg = get_dataset(cfg, cfg.data.domain_trg, cfg.data.eval_rate_trg)
 
         self.X_train_src, self.y_train_src = self._dataset2np(dataset_train_src)
         self.X_eval_src, self.y_eval_src = self._dataset2np(dataset_eval_src)
@@ -170,7 +170,7 @@ class MLDATrainer(Trainer):
 
         return self.model
 
-    def test(self,phase='test') -> dict:
+    def test(self, phase='test') -> dict:
         y_pred = self.model.predict(self.X_eval_trg)
         y_true = self.y_eval_trg
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)

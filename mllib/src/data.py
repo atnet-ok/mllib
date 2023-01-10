@@ -14,7 +14,7 @@ import os
 from mllib.src.preprocess import get_transform
 
 class CWRUsyn2real(Dataset):
-    def __init__(self,domain='real',is_train=True,seed=42) -> None:
+    def __init__(self,domain='real',eval_rate=0.2,is_train=True,seed=42) -> None:
         super().__init__()
         if domain == 'real':
             X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
@@ -27,7 +27,7 @@ class CWRUsyn2real(Dataset):
                                                     X, 
                                                     y, 
                                                     stratify=y,
-                                                    test_size=0.2, 
+                                                    test_size=eval_rate, 
                                                     random_state=seed
                                                     )
         if is_train:
@@ -46,7 +46,7 @@ class CWRUsyn2real(Dataset):
         return self.y.shape[0]
 
 class OfficeHome(Dataset):
-    def __init__(self, img_size, domain="Art", is_train=True, root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
+    def __init__(self, img_size, domain="Art",eval_rate=0.2, is_train=True, root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
         super().__init__()
         df = pd.DataFrame()
         df['path'] = glob(root + "/**/**/*.jpg")
@@ -58,7 +58,7 @@ class OfficeHome(Dataset):
 
         train_df, test_df = train_test_split(
             df,  
-            test_size=0.2, 
+            test_size=eval_rate, 
             random_state=seed, 
             stratify=df["class"]
         )
@@ -97,7 +97,7 @@ buildin_dataset = {
     "ImageNet":ImageNet
 }
 
-def get_dataset(cfg, domain = None):
+def get_dataset(cfg, domain = None, eval_rate=0.2):
     if cfg.data.name in buildin_dataset.keys():
         transform = transforms.Compose(
             [
@@ -105,14 +105,14 @@ def get_dataset(cfg, domain = None):
                 transforms.Normalize((0.5, ), (0.5, ))
                 ]
                 )
-        root = "/mnt/d/data"
+        root = __file__.replace("mllib/src/data.py",'')+'data'
         dataset= buildin_dataset[cfg.data.name](
             root=root,
             transform=transform,
             download = True
             )
 
-        train_size = int(0.8 * len(dataset))
+        train_size = int((1-eval_rate) * len(dataset))
         val_size = len(dataset) - train_size
         dataset_train, dataset_eval= random_split(
             dataset, 

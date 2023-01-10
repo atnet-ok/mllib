@@ -52,9 +52,10 @@ class data_cfg(RecursiveDataclass):
     batch_size_eval:int = None
     class_num:int = None
     data_size:int = None
-    src:str = None
-    trg:str = None
-    test_rate:float= None
+    domain_src:str = None
+    domain_trg:str = None
+    eval_rate_src:float= None
+    eval_rate_trg:float= None
 
 @dataclass
 class config(RecursiveDataclass):

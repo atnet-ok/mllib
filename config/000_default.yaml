@@ -1,8 +1,8 @@
 train:
   device: cuda:0
-  epoch: 15
+  epoch: 3
   lr: 0.0001
-  name: DeepLerning
+  name: DLTrainer
   optimizer: adam
   wd: 0.0001
   amp: true
