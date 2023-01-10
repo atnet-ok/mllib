@@ -1,8 +1,11 @@
 **/__pycache__/
 mlruns
-data/*
-model/*
-log/*
+/data/**
+!/data/**/.gitkeep
+/model/**
+!/model/**/.gitkeep
+/log/**
+!/log/**/.gitkeep
 config/*
 tests/data/log/*
 tests/data/model/*
