@@ -81,6 +81,7 @@ class TestMLTrainer(unittest.TestCase):
         args = self.args
         args.run_name = 'sklearn_train_da'
         cfg, logger = start_experiment(args)
+        cfg.train.seed = 0
         trainer = get_trainer(cfg,logger)
         _ = trainer.train()
 
@@ -89,6 +90,7 @@ class TestMLTrainer(unittest.TestCase):
         
         cfg, logger = start_experiment(self.args)
         cfg.data.eval_rate = 0.996
+        cfg.train.seed = 0
         trainer = get_trainer(cfg,logger)
         _ = trainer.train()
 
