@@ -48,12 +48,13 @@ class model_cfg(RecursiveDataclass):
 @dataclass
 class data_cfg(RecursiveDataclass):
     name:str=None
-    batch_size_train:int = None
-    batch_size_eval:int = None
+    batch_size_train:int = 32
+    batch_size_eval:int = 32
     class_num:int = None
     data_size:int = None
     domain_src:str = None
     domain_trg:str = None
+    eval_rate:float= 0.2
     eval_rate_src:float= None
     eval_rate_trg:float= None
 

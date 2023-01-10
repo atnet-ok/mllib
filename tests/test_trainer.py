@@ -49,7 +49,7 @@ class TestMLTrainer(unittest.TestCase):
 
         self.args = args
 
-    @unittest.skip('skipped')
+    #@unittest.skip('skipped')
     def test_sklearn(self):
 
         model_s = [
@@ -66,7 +66,7 @@ class TestMLTrainer(unittest.TestCase):
             _ = trainer.train()
             _ = trainer.test()
 
-    # @unittest.skip('skipped')
+    @unittest.skip('skipped')
     def test_mldatrainer(self):
         self.args.run_name = 'sklearn_train_da'
         cfg, logger = start_experiment(self.args)

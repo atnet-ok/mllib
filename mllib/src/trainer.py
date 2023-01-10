@@ -104,7 +104,7 @@ class MLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
-        dataset_train, dataset_eval = get_dataset(cfg)
+        dataset_train, dataset_eval = get_dataset(cfg, eval_rate=cfg.data.eval_rate)
         self.X_train, self.y_train = self._dataset2np(dataset_train)
         self.X_eval, self.y_eval = self._dataset2np(dataset_eval)
 
