@@ -1,4 +1,5 @@
 import unittest
+import mlflow
 from mllib.src.config import * 
 from mllib.src.trainer import *
 from mllib.src.data import *
@@ -8,6 +9,12 @@ from mllib.src.logger import *
 # python -m unittest tests.test_trainer.TestMLTrainer
 
 class TestDLTrainer(unittest.TestCase):
+    def setUp(self):
+        print('Called `setUp`.')
+
+    def tearDown(self):
+        mlflow.end_run()
+
     @unittest.skip('skipped')
     def test_init(self):
         cfg = get_config()
@@ -49,7 +56,10 @@ class TestMLTrainer(unittest.TestCase):
 
         self.args = args
 
-    #@unittest.skip('skipped')
+    def tearDown(self):
+        mlflow.end_run()
+
+    @unittest.skip('skipped')
     def test_sklearn(self):
 
         model_s = [
@@ -66,10 +76,19 @@ class TestMLTrainer(unittest.TestCase):
             _ = trainer.train()
             _ = trainer.test()
 
-    @unittest.skip('skipped')
+    #@unittest.skip('skipped')
     def test_mldatrainer(self):
-        self.args.run_name = 'sklearn_train_da'
+        args = self.args
+        args.run_name = 'sklearn_train_da'
+        cfg, logger = start_experiment(args)
+        trainer = get_trainer(cfg,logger)
+        _ = trainer.train()
+
+    # @unittest.skip('skipped')
+    def test_fewrealtrainer(self):
+        
         cfg, logger = start_experiment(self.args)
+        cfg.data.eval_rate = 0.996
         trainer = get_trainer(cfg,logger)
         _ = trainer.train()
 

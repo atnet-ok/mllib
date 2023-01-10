@@ -10,6 +10,6 @@ data:
   domain_src: syn
   domain_trg: real
   eval_rate_src: 0.2
-  eval_rate_trg: 0.99
+  eval_rate_trg: 0.996
 model:
   name: RandomForestClassifier
