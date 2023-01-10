@@ -125,11 +125,13 @@ def get_dataset(cfg, domain = None, eval_rate=0.2):
     elif cfg.data.name =="CWRUsyn2real":
         dataset_train = CWRUsyn2real(
             domain= domain if domain else 'real',
+            eval_rate=eval_rate,
             is_train=True,
             seed=cfg.train.seed
         )
         dataset_eval = CWRUsyn2real(
             domain= domain if domain else 'real',
+            eval_rate=eval_rate,
             is_train=False,
             seed=cfg.train.seed
         )

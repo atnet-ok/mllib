@@ -143,14 +143,22 @@ class MLSDATrainer(Trainer):
         self.X_eval_src, self.y_eval_src = self._dataset2np(dataset_eval_src)
         self.X_train_trg, self.y_train_trg = self._dataset2np(dataset_train_trg)
         self.X_eval_trg, self.y_eval_trg = self._dataset2np(dataset_eval_trg)
+        print(f'train_src:{self.y_train_src.shape[0]}')
+        print(f'eval_src:{self.y_eval_src.shape[0]}')
+        print(f'train_trg:{self.y_train_trg.shape[0]}')
+        print(f'eval_trg:{self.y_eval_trg.shape[0]}')
 
-        self.model = TrAdaBoost(
-            self.model, 
-            n_estimators=10, 
-            Xt=self.X_train_trg, 
-            yt=self.y_train_trg, 
-            random_state=cfg.train.seed
-        )
+        if cfg.train.da_method == 'TrAdaBoost':
+            self.model = TrAdaBoost(
+                self.model, 
+                n_estimators=10, 
+                Xt=self.X_train_trg, 
+                yt=self.y_train_trg, 
+                random_state=cfg.train.seed
+            )
+        else:
+            raise Exception(f'{cfg.train.da_method} in not implemented')
+
 
     def _dataset2np(self,dataset):
         data_s = []

@@ -2,6 +2,7 @@ train:
   name: MLSDATrainer
   task: classification
   seed: 42
+  da_method: TrAdaBoost
 data:
   class_num: 10
   data_size: 1000
@@ -9,6 +10,6 @@ data:
   domain_src: syn
   domain_trg: real
   eval_rate_src: 0.2
-  eval_rate_trg: 0.9
+  eval_rate_trg: 0.99
 model:
   name: RandomForestClassifier
