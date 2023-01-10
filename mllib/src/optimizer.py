@@ -5,8 +5,8 @@ from timm.scheduler import CosineLRScheduler
 def get_optimizer(cfg,model):
     opt = cfg.train.optimizer
     lr = cfg.train.lr
-    weight_decay = cfg.train.wd
-    momentum = cfg.train.momentum
+    weight_decay = cfg.train.wd if cfg.train.wd else 0
+    momentum = cfg.train.momentum if cfg.train.momentum else 0
 
     if opt == 'sgd':
         optimizer = optim.SGD(
@@ -60,7 +60,7 @@ def get_scheduler(cfg,optimizer):
                 optimizer, 
                 t_initial=epoch , 
                 lr_min=lr*1e-1, 
-                warmup_t=5, 
+                warmup_t=int(epoch/5), 
                 warmup_lr_init=lr*1e-1, 
                 warmup_prefix=True
                 )
@@ -71,7 +71,7 @@ def get_scheduler(cfg,optimizer):
             T_max= epoch)
     elif sche=='step':
         scheduler = StepLR(optimizer, step_size=7, gamma=0.1)
-    elif sche=='none':
+    else:
         scheduler = StepLR(optimizer, step_size=epoch, gamma=0.1)
 
     return scheduler, optimizer

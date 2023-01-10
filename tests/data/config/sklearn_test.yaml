@@ -1,5 +1,5 @@
 train:
-  name: SKLearn
+  name: MLTrainer
   seed: 42
 data:
   class_num: 10

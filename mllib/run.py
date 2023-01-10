@@ -4,14 +4,13 @@ sys.path.append(__file__.replace("mllib/run.py",''))
 from mllib.src.trainer import *
 from mllib.src.utils import *
 
-
 import argparse
 
 if __name__=='__main__':
     # recieve args from input
     parser = argparse.ArgumentParser()
-    parser.add_argument('-name', '--experiment_name',  default="test", type=str)
-    parser.add_argument('-id', '--run_id', default='000_default', type=str)
+    parser.add_argument('-exp', '--experiment_name',  default="test", type=str)
+    parser.add_argument('-run', '--run_name', default='000_default', type=str)
     parser.add_argument('-m', '--mode', default='train', type=str)
     parser.add_argument('-cfg', '--cfg_dir', default="config/", type=str)
     parser.add_argument('-model', '--model_dir', default="model/", type=str)
@@ -24,7 +23,7 @@ if __name__=='__main__':
     if args.mode == 'train':
         trainer = get_trainer(cfg, logger)
         model = trainer.train()
-        metrics = trainer.test()
+        metrics = None
     elif args.mode == 'test':
         trainer = get_trainer(cfg, logger)
         model = None

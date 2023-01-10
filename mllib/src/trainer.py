@@ -4,6 +4,7 @@ from mllib.src.data import *
 from mllib.src.model import *
 from mllib.src.optimizer import *
 from mllib.src.logger import *
+from adapt.instance_based import TrAdaBoost
 import torch
 import numpy as np
 import warnings
@@ -26,12 +27,13 @@ class Trainer(metaclass=ABCMeta):
     def test(self) -> dict:
         pass  
 
-class DeepLerning(Trainer):
+class DLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
         self.optimizer, self.model = get_optimizer(cfg, self.model)
-        self.dl_train, self.dl_eval = get_dataloader(cfg)
+        dataset_train, dataset_eval = get_dataset(cfg)
+        self.dl_train, self.dl_eval = get_dataloader(cfg, dataset_train, dataset_eval)
         self.scheduler, self.optimizer = get_scheduler(cfg, self.optimizer)
 
         self.class_num = cfg.data.class_num
@@ -40,6 +42,7 @@ class DeepLerning(Trainer):
         self.amp = cfg.train.amp #True
 
         self.model = self.model.to(self.device)
+        #self.model = torch.compile(self.model) #for pytorch 2.0
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
@@ -97,7 +100,7 @@ class DeepLerning(Trainer):
         metrics_dict = self._update( self.dl_eval, 'test')
         return metrics_dict
 
-class SKLearn(Trainer):
+class MLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
@@ -118,19 +121,66 @@ class SKLearn(Trainer):
         self.model.fit(self.X_train, self.y_train)
         y_pred = self.model.predict(self.X_train)
         y_true = self.y_train
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,'train')
+        _ = self.logger.log_metrics(y_true,y_pred,'train')
+        _ = self.test(phase='eval')
 
         return self.model
 
-    def test(self) -> dict:
+    def test(self,phase='test') -> dict:
         y_pred = self.model.predict(self.X_eval)
         y_true = self.y_eval
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,'test')
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 
+class MLDATrainer(Trainer):
+    def __init__(self, cfg, logger, model_trained=None) -> None:
+        super().__init__(cfg, logger, model_trained)
+
+        dataset_train_src, dataset_eval_src = get_dataset(cfg, cfg.data.domain_src, cfg.data.eval_rate_src)
+        dataset_train_trg, dataset_eval_trg = get_dataset(cfg, cfg.data.domain_trg, cfg.data.eval_rate_trg)
+
+        self.X_train_src, self.y_train_src = self._dataset2np(dataset_train_src)
+        self.X_eval_src, self.y_eval_src = self._dataset2np(dataset_eval_src)
+        self.X_train_trg, self.y_train_trg = self._dataset2np(dataset_train_trg)
+        self.X_eval_trg, self.y_eval_trg = self._dataset2np(dataset_eval_trg)
+
+        self.model = TrAdaBoost(
+            self.model, 
+            n_estimators=10, 
+            Xt=self.X_train_trg, 
+            yt=self.y_train_trg, 
+            random_state=cfg.train.seed
+        )
+
+    def _dataset2np(self,dataset):
+        data_s = []
+        label_s = []
+        for i in range(dataset.__len__()):
+            data,label = dataset.__getitem__(i)
+            data_s.append(data)
+            label_s.append(label)
+        return np.array(data_s) , np.array(label_s) 
+
+    def train(self) -> dict:
+        self.model.fit(self.X_train_src, self.y_train_src)
+        y_pred = self.model.predict(self.X_train_trg)
+        y_true = self.y_train_trg
+        _ = self.logger.log_metrics(y_true,y_pred,'train')
+        _ = self.test(phase='eval')
+
+        return self.model
+
+    def test(self, phase='test') -> dict:
+        y_pred = self.model.predict(self.X_eval_trg)
+        y_true = self.y_eval_trg
+        metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
+        return metrics_dict
+
+
 trainer_dct = {
-    "DeepLerning":DeepLerning,
-    "SKLearn":SKLearn
+    "DLTrainer":DLTrainer,
+    "MLTrainer":MLTrainer,
+    "MLDATrainer":MLDATrainer
 }
 
 def get_trainer(cfg,logger):

@@ -1,18 +1,20 @@
 train:
   device: cuda:0
   epoch: 3
-  lr: 0.001
-  name: DeepLerning
-  optimizer: sgd
-  wd: 0.0
+  lr: 0.0001
+  name: DLTrainer
+  optimizer: adam
+  wd: 0.0001
   amp: true
+  scheduler: cosine_warmup
+  momentum: 0.9
 data:
-  batch_size_eval: 128
-  batch_size_train: 128
-  class_num: 10
-  data_size: 28
-  name: MNIST
+  batch_size_eval: 32
+  batch_size_train: 32
+  class_num: 65
+  data_size: 224
+  name: OfficeHome
 model:
-  in_chans: 1
-  name: resnet50
+  in_chans: 3
+  name: tf_efficientnet_b7 #swin_base_patch4_window7_224_in22k, 'tf_efficientnetv2_l_in21ft1k'
   pre_train: true

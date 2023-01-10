@@ -130,7 +130,7 @@ class CNN1d(nn.Module):
 
 
 def get_model(cfg):
-    if cfg.train.name == 'DeepLerning':
+    if cfg.train.name == 'DLTrainer':
         if cfg.model.name in timm.list_models():
             model = TimmClassifier(
                 model_name = cfg.model.name,
@@ -148,7 +148,7 @@ def get_model(cfg):
         else:
             raise Exception(f'{cfg.model.name} in not implemented')
 
-    elif cfg.train.name == 'SKLearn':
+    elif cfg.train.name in ['MLTrainer', 'MLDATrainer']:
         if cfg.model.name == "RandomForestClassifier":
             model = RandomForestClassifier()
         elif cfg.model.name == "SVC":

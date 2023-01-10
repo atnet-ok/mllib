@@ -9,7 +9,7 @@ class TestLogger(unittest.TestCase):
     def test_default(self):
         class args:
              experiment_name = "test"
-             run_id = '000_default'
+             run_name = '000_default'
              mode = 'train'
              cfg_dir = "config/"
              model_dir = "model/"
