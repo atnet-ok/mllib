@@ -6,8 +6,6 @@ from sklearn.linear_model import LogisticRegression
 import torch.nn.functional as F
 import timm
 
-
-
 class TimmClassifier(nn.Module):
     def __init__(self, model_name, class_num, pre_train,in_chans):
         super(TimmClassifier, self).__init__()
@@ -148,7 +146,7 @@ def get_model(cfg):
         else:
             raise Exception(f'{cfg.model.name} in not implemented')
 
-    elif cfg.train.name in ['MLTrainer', 'MLDATrainer']:
+    elif cfg.train.name in ['MLTrainer', 'MLSDATrainer']:
         if cfg.model.name == "RandomForestClassifier":
             model = RandomForestClassifier()
         elif cfg.model.name == "SVC":

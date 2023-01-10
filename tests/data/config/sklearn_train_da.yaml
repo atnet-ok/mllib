@@ -1,5 +1,5 @@
 train:
-  name: MLDATrainer
+  name: MLSDATrainer
   task: classification
   seed: 42
 data:

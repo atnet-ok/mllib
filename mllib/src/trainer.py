@@ -132,7 +132,7 @@ class MLTrainer(Trainer):
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 
-class MLDATrainer(Trainer):
+class MLSDATrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
@@ -180,7 +180,7 @@ class MLDATrainer(Trainer):
 trainer_dct = {
     "DLTrainer":DLTrainer,
     "MLTrainer":MLTrainer,
-    "MLDATrainer":MLDATrainer
+    "MLSDATrainer":MLSDATrainer
 }
 
 def get_trainer(cfg,logger):
