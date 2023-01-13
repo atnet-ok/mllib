@@ -72,6 +72,14 @@ def summary_report(metrics_dict:dict, save_acc_per_class=None):
         
     return summary
 
+def log_hparam(dct, parent_key):
+    for key,value in dct.items():
+        parent_key = parent_key+'_'+key
+        if type(value) == dict:
+            log_hparam(value, parent_key)
+        else:
+            mlflow.log_param(parent_key[1:], value)    
+
 
 def start_experiment(args):
     log_path = os.path.join(args.log_dir, args.run_name+'.log')
@@ -88,9 +96,7 @@ def start_experiment(args):
     mlflow.set_experiment(args.experiment_name)
     mlflow.start_run(run_name=args.run_name)
     dct = asdict(cfg)
-    for key_0 in dct:
-        for key, value in dct[key_0].items():
-            mlflow.log_param(key_0+'_'+key, value)
+    log_hparam(dct, parent_key='')
 
     return cfg, logger
 

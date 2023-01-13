@@ -97,7 +97,9 @@ buildin_dataset = {
     "ImageNet":ImageNet
 }
 
-def get_dataset(cfg,phase, domain = None, eval_rate=0.2):
+def get_dataset(cfg,phase, domain = None, eval_rate=None):
+    eval_rate = eval_rate if eval_rate else cfg.data.eval_rate
+    
     if cfg.data.name in buildin_dataset.keys():
         transform = transforms.Compose(
             [
@@ -111,6 +113,7 @@ def get_dataset(cfg,phase, domain = None, eval_rate=0.2):
             transform=transform,
             download = True
             )
+    
 
         train_size = int((1-eval_rate) * len(dataset))
         val_size = len(dataset) - train_size
@@ -143,7 +146,6 @@ def get_dataset(cfg,phase, domain = None, eval_rate=0.2):
             phase=phase,
             seed=cfg.train.seed
         )
-
 
     else:
         raise Exception(f'{cfg.data.name} in not implemented')
