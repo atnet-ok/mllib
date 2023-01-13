@@ -14,7 +14,7 @@ import os
 from mllib.src.preprocess import get_transform
 
 class CWRUsyn2real(Dataset):
-    def __init__(self,domain='real',eval_rate=0.2,is_train=True,seed=42) -> None:
+    def __init__(self, domain='real', eval_rate=0.2, phase='train',seed=42) -> None:
         super().__init__()
         if domain == 'real':
             X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
@@ -30,7 +30,7 @@ class CWRUsyn2real(Dataset):
                                                     test_size=eval_rate, 
                                                     random_state=seed
                                                     )
-        if is_train:
+        if phase=='train':
             self.X = X_train
             self.y = y_train
         else:
@@ -46,7 +46,7 @@ class CWRUsyn2real(Dataset):
         return self.y.shape[0]
 
 class OfficeHome(Dataset):
-    def __init__(self, img_size, domain="Art",eval_rate=0.2, is_train=True, root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
+    def __init__(self, img_size, domain="Art",eval_rate=0.2, phase='train', root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
         super().__init__()
         df = pd.DataFrame()
         df['path'] = glob(root + "/**/**/*.jpg")
@@ -62,7 +62,7 @@ class OfficeHome(Dataset):
             random_state=seed, 
             stratify=df["class"]
         )
-        if is_train:
+        if phase=='train':
             self.df = train_df
         else:
             self.df = test_df  
@@ -70,7 +70,7 @@ class OfficeHome(Dataset):
         self.domain = domain
         classes = sorted(list(set(df['class'].to_list())))
         self.label_dct={classes[i]:i  for i in range(self.class_num)}
-        self.transform = get_transform(img_size,is_train=is_train)
+        self.transform = get_transform(img_size,phase=phase)
 
     def __getitem__(self, index):
         img = self.__get_img(index)
@@ -97,7 +97,7 @@ buildin_dataset = {
     "ImageNet":ImageNet
 }
 
-def get_dataset(cfg, domain = None, eval_rate=0.2):
+def get_dataset(cfg,phase, domain = None, eval_rate=0.2):
     if cfg.data.name in buildin_dataset.keys():
         transform = transforms.Compose(
             [
@@ -122,58 +122,54 @@ def get_dataset(cfg, domain = None, eval_rate=0.2):
                 ]
             )
 
+        if phase=='train':
+            dataset = dataset_train
+        else:
+            dataset = dataset_eval
+
     elif cfg.data.name =="CWRUsyn2real":
-        dataset_train = CWRUsyn2real(
+        dataset = CWRUsyn2real(
             domain= domain if domain else 'real',
             eval_rate=eval_rate,
-            is_train=True,
-            seed=cfg.train.seed
-        )
-        dataset_eval = CWRUsyn2real(
-            domain= domain if domain else 'real',
-            eval_rate=eval_rate,
-            is_train=False,
+            phase=phase,
             seed=cfg.train.seed
         )
 
+
     elif cfg.data.name =="OfficeHome":
-        dataset_train = OfficeHome(
+        dataset = OfficeHome(
             img_size=cfg.data.data_size,
             domain=domain if domain else "Art",
-            is_train=True,
+            phase=phase,
             seed=cfg.train.seed
         )
-        dataset_eval = OfficeHome(
-            img_size=cfg.data.data_size,
-            domain=domain if domain else "Art",
-            is_train=False,
-            seed=cfg.train.seed
-        )
+
 
     else:
         raise Exception(f'{cfg.data.name} in not implemented')
 
-    return dataset_train, dataset_eval
+    return dataset
 
-def get_dataloader(cfg, dataset_train, dataset_eval):
+def get_dataloader(cfg, phase, dataset):
 
     train_batch_size = cfg.data.batch_size_train
     eval_batch_size = cfg.data.batch_size_eval
 
-    train_loader = DataLoader(
-        dataset_train, 
-        batch_size=train_batch_size, 
-        shuffle=True, 
-        num_workers=4, 
-        pin_memory=True
-    )
+    if phase=='train':
+        loader = DataLoader(
+            dataset, 
+            batch_size=train_batch_size, 
+            shuffle=True, 
+            num_workers=4, 
+            pin_memory=True
+        )
+    else:
+        loader = DataLoader(
+            dataset, 
+            batch_size=eval_batch_size,
+            shuffle=False, 
+            num_workers=4, 
+            pin_memory=True
+        )
 
-    eval_loader = DataLoader(
-        dataset_eval, 
-        batch_size=eval_batch_size,
-        shuffle=False, 
-        num_workers=4, 
-        pin_memory=True
-    )
-
-    return train_loader, eval_loader 
+    return loader

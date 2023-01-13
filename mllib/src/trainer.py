@@ -27,13 +27,22 @@ class Trainer(metaclass=ABCMeta):
     def test(self) -> dict:
         pass  
 
+    def _dataset2np(self,dataset):
+        data_s = []
+        label_s = []
+        for i in range(dataset.__len__()):
+            data,label = dataset.__getitem__(i)
+            data_s.append(data)
+            label_s.append(label)
+        return np.array(data_s) , np.array(label_s) 
+
+
 class DLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
 
+        self.cfg = cfg
         self.optimizer, self.model = get_optimizer(cfg, self.model)
-        dataset_train, dataset_eval = get_dataset(cfg)
-        self.dl_train, self.dl_eval = get_dataloader(cfg, dataset_train, dataset_eval)
         self.scheduler, self.optimizer = get_scheduler(cfg, self.optimizer)
 
         self.class_num = cfg.data.class_num
@@ -87,66 +96,68 @@ class DLTrainer(Trainer):
 
 
     def train(self) -> dict:
+
+        dataset_train = get_dataset(self.cfg,phase='train')
+        dataset_eval = get_dataset(self.cfg,phase='eval')
+        dl_train = get_dataloader(self.cfg, 'train',dataset_train)
+        dl_eval = get_dataloader(self.cfg, 'eval',dataset_eval)
+
         for epoch in range(self.epoch):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
-            self._update(self.dl_train, 'train', epoch)
-            self._update(self.dl_eval, 'eval', epoch)
+            self._update(dl_train, 'train', epoch)
+            self._update(dl_eval, 'eval', epoch)
 
         return self.model
  
 
     def test(self) -> dict:
-        metrics_dict = self._update( self.dl_eval, 'test')
+        dataset_test = get_dataset(self.cfg,phase='eval')
+        dl_test = get_dataloader(self.cfg, 'eval', dataset_test)
+        metrics_dict = self._update( dl_test, 'test')
         return metrics_dict
 
 class MLTrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
-
-        dataset_train, dataset_eval = get_dataset(cfg, eval_rate=cfg.data.eval_rate)
-        self.X_train, self.y_train = self._dataset2np(dataset_train)
-        self.X_eval, self.y_eval = self._dataset2np(dataset_eval)
-
-    def _dataset2np(self,dataset):
-        data_s = []
-        label_s = []
-        for i in range(dataset.__len__()):
-            data,label = dataset.__getitem__(i)
-            data_s.append(data)
-            label_s.append(label)
-        return np.array(data_s) , np.array(label_s) 
+        self.cfg = cfg
 
     def train(self) -> dict:
-        self.model.fit(self.X_train, self.y_train)
-        y_pred = self.model.predict(self.X_train)
-        y_true = self.y_train
+        dataset_train = get_dataset(self.cfg,phase='train', eval_rate=self.cfg.data.eval_rate)
+        dataset_eval = get_dataset(self.cfg,phase='eval', eval_rate=self.cfg.data.eval_rate)
+
+        X_train, y_train = self._dataset2np(dataset_train)
+        X_eval, y_eval = self._dataset2np(dataset_eval)
+
+        self.model.fit(X_train, y_train)
+
+        y_pred = self.model.predict(X_train)
+        y_true = y_train
         _ = self.logger.log_metrics(y_true,y_pred,'train')
-        _ = self.test(phase='eval')
+
+        y_pred = self.model.predict(X_eval)
+        y_true = y_eval
+        _ = self.logger.log_metrics(y_true,y_pred,'eval')
 
         return self.model
 
-    def test(self,phase='test') -> dict:
-        y_pred = self.model.predict(self.X_eval)
-        y_true = self.y_eval
+    def test(self) -> dict:
+        phase='test'
+        dataset_test = get_dataset(self.cfg,phase=phase, eval_rate=self.cfg.data.eval_rate)
+        X_test, y_test = self._dataset2np(dataset_test)
+
+        y_pred = self.model.predict(X_test)
+        y_true = y_test
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 
 class MLSDATrainer(Trainer):
     def __init__(self, cfg, logger, model_trained=None) -> None:
         super().__init__(cfg, logger, model_trained)
+        self.cfg = cfg
 
-        dataset_train_src, dataset_eval_src = get_dataset(cfg, cfg.data.domain_src, cfg.data.eval_rate_src)
-        dataset_train_trg, dataset_eval_trg = get_dataset(cfg, cfg.data.domain_trg, cfg.data.eval_rate_trg)
-
-        self.X_train_src, self.y_train_src = self._dataset2np(dataset_train_src)
-        self.X_eval_src, self.y_eval_src = self._dataset2np(dataset_eval_src)
+        dataset_train_trg = get_dataset(self.cfg, phase='train', domain=self.cfg.data.domain_trg,eval_rate=self.cfg.data.eval_rate)
         self.X_train_trg, self.y_train_trg = self._dataset2np(dataset_train_trg)
-        self.X_eval_trg, self.y_eval_trg = self._dataset2np(dataset_eval_trg)
-        print(f'train_src:{self.y_train_src.shape[0]}')
-        print(f'eval_src:{self.y_eval_src.shape[0]}')
-        print(f'train_trg:{self.y_train_trg.shape[0]}')
-        print(f'eval_trg:{self.y_eval_trg.shape[0]}')
 
         if cfg.train.da_method == 'TrAdaBoost':
             self.model = TrAdaBoost(
@@ -159,28 +170,37 @@ class MLSDATrainer(Trainer):
         else:
             raise Exception(f'{cfg.train.da_method} in not implemented')
 
-
-    def _dataset2np(self,dataset):
-        data_s = []
-        label_s = []
-        for i in range(dataset.__len__()):
-            data,label = dataset.__getitem__(i)
-            data_s.append(data)
-            label_s.append(label)
-        return np.array(data_s) , np.array(label_s) 
-
     def train(self) -> dict:
-        self.model.fit(self.X_train_src, self.y_train_src)
+
+
+        dataset_train_src = get_dataset(self.cfg, phase='train', domain=self.cfg.data.domain_src, eval_rate=self.cfg.data.eval_rate)
+        #dataset_eval_src = get_dataset(self.cfg, phase='eval', domain=self.cfg.data.domain_src,eval_rate=self.cfg.data.eval_rate)
+        dataset_eval_trg = get_dataset(self.cfg, phase='eval', domain=self.cfg.data.domain_trg,eval_rate=self.cfg.data.eval_rate)
+
+        X_train_src, y_train_src = self._dataset2np(dataset_train_src)
+        #X_eval_src, y_eval_src = self._dataset2np(dataset_eval_src)
+        X_eval_trg, y_eval_trg = self._dataset2np(dataset_eval_trg)
+
+        self.model.fit(X_train_src, y_train_src)
+
         y_pred = self.model.predict(self.X_train_trg)
         y_true = self.y_train_trg
         _ = self.logger.log_metrics(y_true,y_pred,'train')
-        _ = self.test(phase='eval')
+
+        y_pred = self.model.predict(X_eval_trg)
+        y_true = y_eval_trg
+        _ = self.logger.log_metrics(y_true,y_pred,'eval')
+
 
         return self.model
 
-    def test(self, phase='test') -> dict:
-        y_pred = self.model.predict(self.X_eval_trg)
-        y_true = self.y_eval_trg
+    def test(self) -> dict:
+        phase='test'
+        dataset_test_trg = get_dataset(self.cfg, phase, domain=self.cfg.data.domain_trg,eval_rate=self.cfg.data.eval_rate)
+        X_test_trg, y_test_trg = self._dataset2np(dataset_test_trg)
+
+        y_pred = self.model.predict(X_test_trg)
+        y_true = y_test_trg
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
         return metrics_dict
 

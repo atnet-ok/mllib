@@ -1,8 +1,8 @@
 from torchvision import transforms
 
-def get_transform(img_size,is_train=True):
+def get_transform(img_size,phase=True):
 
-    if is_train:
+    if phase:
         transform = transforms.Compose([
                 transforms.RandomResizedCrop(img_size),
                 transforms.RandomHorizontalFlip(),
