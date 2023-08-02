@@ -16,7 +16,9 @@ def get_transform(img_size,phase=True):
                 transforms.RandomAdjustSharpness(sharpness_factor=0,p=0.2),
                 transforms.RandomGrayscale(p=0.1),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                transforms.Normalize(
+                    [0.485, 0.456, 0.406], 
+                    [0.229, 0.224, 0.225])
             ])
 
     else:
@@ -24,7 +26,9 @@ def get_transform(img_size,phase=True):
                 transforms.Resize(round(img_size*256/224)),
                 transforms.CenterCrop(img_size),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                transforms.Normalize(
+                    [0.485, 0.456, 0.406], 
+                    [0.229, 0.224, 0.225])
             ])
 
     return  transform 

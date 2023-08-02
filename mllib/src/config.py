@@ -51,11 +51,11 @@ class model_cfg(RecursiveDataclass):
 @dataclass
 class data_cfg(RecursiveDataclass):
     name:str=None
-    batch_size_train:int = 32
-    batch_size_eval:int = 32
+    batch_size_train:int = None
+    batch_size_eval:int = None
     class_num:int = None
-    data_size:int = None
-    eval_rate:float= 0.2
+    data_size:int = None #listの方が画像やセンサデータにも対応できてよい？
+    eval_rate:float= None
     other:dict = None
 
 @dataclass

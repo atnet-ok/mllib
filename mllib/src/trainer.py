@@ -32,14 +32,7 @@ class Trainer(metaclass=ABCMeta):
     def test(self) -> dict:
         pass  
 
-    def _dataset2np(self,dataset):
-        data_s = []
-        label_s = []
-        for i in range(dataset.__len__()):
-            data,label = dataset.__getitem__(i)
-            data_s.append(data)
-            label_s.append(label)
-        return np.array(data_s) , np.array(label_s) 
+
 
 
 class DLTrainer(Trainer):
@@ -68,9 +61,13 @@ class DLTrainer(Trainer):
         elif self.task == 'regression':
             self.criterion = nn.MSELoss()
             self.score = "r2"
+            self.best_score = 0
+            self.score_direction = 1
         elif self.task == 'generation':
             self.criterion = nn.MSELoss()
             self.score = "MSE"
+            self.best_score = 100000
+            self.score_direction = -1
 
     def _update(self, dataloader:DataLoader ,phase:str='train', epoch =None) -> dict:
 
@@ -116,6 +113,9 @@ class DLTrainer(Trainer):
             metrics_dict, phase, self.score, loss_dct, epoch
             )
         return metrics_and_loss_dict
+
+    def _infer(self):
+        pass
 
     def train(self) -> dict:
 
@@ -174,6 +174,14 @@ class MLTrainer(Trainer):
         y_true = y_test
         metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
 
+    def _dataset2np(self,dataset):
+        data_s = []
+        label_s = []
+        for i in range(dataset.__len__()):
+            data,label = dataset.__getitem__(i)
+            data_s.append(data)
+            label_s.append(label)
+        return np.array(data_s) , np.array(label_s)
 
 trainer_dct = {
     "DLTrainer":DLTrainer,
