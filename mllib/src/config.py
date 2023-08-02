@@ -37,7 +37,7 @@ class train_cfg(RecursiveDataclass):
     device:str=None
     amp:bool=None
     scheduler:str=None
-    da_method:str=None # Trasnsfer Learning Method
+    method:str=None 
 @dataclass
 class model_cfg(RecursiveDataclass):
     name: str=None
@@ -52,11 +52,7 @@ class data_cfg(RecursiveDataclass):
     batch_size_eval:int = 32
     class_num:int = None
     data_size:int = None
-    domain_src:str = None
-    domain_trg:str = None
     eval_rate:float= 0.2
-    eval_rate_src:float= None
-    eval_rate_trg:float= None
 
 @dataclass
 class config(RecursiveDataclass):
@@ -64,7 +60,8 @@ class config(RecursiveDataclass):
     data: data_cfg = data_cfg()
     train: train_cfg= train_cfg()
 
-def get_config(config_path:str="config/000_default.yaml"):
+def get_config(config_path):
+
     dct = yaml2dct(config_path)
     cfg = config.from_dict(dct)
     return cfg

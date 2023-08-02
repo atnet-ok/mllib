@@ -13,9 +13,16 @@ import os
 
 from mllib.src.preprocess import get_transform
 
-class CWRUsyn2real(Dataset):
-    def __init__(self, domain='real', eval_rate=0.2, phase='train',seed=42) -> None:
+class MllibDataset(Dataset):
+    def __init__(self, phase, eval_rate, seed) -> None:
         super().__init__()
+        self.phase = phase
+        self.eval_rate = eval_rate
+        self.seed = seed
+
+class CWRUsyn2real(MllibDataset):
+    def __init__(self, domain='real', eval_rate=0.2, phase='train',seed=42) -> None:
+        super().__init__( phase, eval_rate, seed)
         if domain == 'real':
             X = np.load("data/CWRU_syn2real/preprocessed/XreallDEenv.npy")
             y = np.load("data/CWRU_syn2real/preprocessed/yreallDEenv.npy")
@@ -45,9 +52,9 @@ class CWRUsyn2real(Dataset):
     def __len__(self):
         return self.y.shape[0]
 
-class OfficeHome(Dataset):
-    def __init__(self, img_size, domain="Art",eval_rate=0.2, phase='train', root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
-        super().__init__()
+class OfficeHome(MllibDataset):
+    def __init__(self, img_size, domain="Art", eval_rate=0.2, phase='train', root = "/mnt/d/data/OfficeHomeDataset/",seed=42) -> None:
+        super().__init__( phase, eval_rate, seed)
         df = pd.DataFrame()
         df['path'] = glob(root + "/**/**/*.jpg")
         df['domain'] = df["path"].map(lambda x: x.split("/")[-3])
@@ -97,53 +104,51 @@ buildin_dataset = {
     "ImageNet":ImageNet
 }
 
-def get_dataset(cfg,phase, domain = None, eval_rate=0.2):
-    if cfg.data.name in buildin_dataset.keys():
-        transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize((0.5, ), (0.5, ))
-                ]
-                )
-        root = __file__.replace("mllib/src/data.py",'')+'data'
-        dataset= buildin_dataset[cfg.data.name](
-            root=root,
-            transform=transform,
-            download = True
-            )
+def get_dataset(cfg, phase):
+    # if cfg.data.name in buildin_dataset.keys():
+    #     transform = transforms.Compose(
+    #         [
+    #             transforms.ToTensor(),
+    #             transforms.Normalize((0.5, ), (0.5, ))
+    #             ]
+    #             )
+    #     root = __file__.replace("mllib/src/data.py",'')+'data'
+    #     dataset= buildin_dataset[cfg.data.name](
+    #         root=root,
+    #         transform=transform,
+    #         download = True
+    #         )
 
-        train_size = int((1-eval_rate) * len(dataset))
-        val_size = len(dataset) - train_size
-        dataset_train, dataset_eval= random_split(
-            dataset, 
-            [
-                train_size, 
-                val_size
-                ]
-            )
+    #     train_size = int((1-eval_rate) * len(dataset))
+    #     val_size = len(dataset) - train_size
+    #     dataset_train, dataset_eval= random_split(
+    #         dataset, 
+    #         [
+    #             train_size, 
+    #             val_size
+    #             ]
+    #         )
 
-        if phase=='train':
-            dataset = dataset_train
-        else:
-            dataset = dataset_eval
+    #     if phase=='train':
+    #         dataset = dataset_train
+    #     else:
+    #         dataset = dataset_eval
 
-    elif cfg.data.name =="CWRUsyn2real":
+    if cfg.data.name =="CWRUsyn2real":
         dataset = CWRUsyn2real(
-            domain= domain if domain else 'real',
-            eval_rate=eval_rate,
             phase=phase,
-            seed=cfg.train.seed
+            seed=cfg.train.seed,
+            eval_rate=cfg.data.eval_rate,
         )
 
 
     elif cfg.data.name =="OfficeHome":
         dataset = OfficeHome(
-            img_size=cfg.data.data_size,
-            domain=domain if domain else "Art",
             phase=phase,
-            seed=cfg.train.seed
+            seed=cfg.train.seed,
+            eval_rate=cfg.data.eval_rate,
+            img_size=cfg.data.data_size
         )
-
 
     else:
         raise Exception(f'{cfg.data.name} in not implemented')
