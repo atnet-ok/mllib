@@ -8,12 +8,17 @@ train:
   amp: true
   scheduler: cosine_warmup
   momentum: 0.9
+  task: classification
+  seed: 42
 data:
   batch_size_eval: 32
   batch_size_train: 32
   class_num: 65
   data_size: 224
   name: OfficeHome
+  other:
+    a: 1
+    b: 2
 model:
   in_chans: 3
   name: tf_efficientnet_b7 #swin_base_patch4_window7_224_in22k, 'tf_efficientnetv2_l_in21ft1k'

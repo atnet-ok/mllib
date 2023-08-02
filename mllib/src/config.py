@@ -38,12 +38,15 @@ class train_cfg(RecursiveDataclass):
     amp:bool=None
     scheduler:str=None
     method:str=None 
+    other:dict = None
+
 @dataclass
 class model_cfg(RecursiveDataclass):
     name: str=None
     pre_train:bool =None
     in_chans:int=None
     model_trained:str=None
+    other:dict = None
 
 @dataclass
 class data_cfg(RecursiveDataclass):
@@ -53,6 +56,7 @@ class data_cfg(RecursiveDataclass):
     class_num:int = None
     data_size:int = None
     eval_rate:float= 0.2
+    other:dict = None
 
 @dataclass
 class config(RecursiveDataclass):

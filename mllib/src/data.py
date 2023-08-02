@@ -47,6 +47,7 @@ class CWRUsyn2real(MllibDataset):
     def __getitem__(self, index):
         data = self.X[index] #[np.newaxis,:]
         label = self.y[index]
+        label = torch.eye(self.class_num)[label]
         return data, label
 
     def __len__(self):

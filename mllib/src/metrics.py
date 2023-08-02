@@ -1,4 +1,5 @@
 from sklearn.metrics import classification_report, accuracy_score, f1_score
+import numpy as np
 
 def get_metrics(cfg):
     task = cfg.train.task
@@ -42,12 +43,19 @@ def classification_metrics(y_pred, y_true):
                     pass 
             
         return summary
+    
+    cls_true = [np.argmax(i) for i in y_true]
+    cls_pred = [np.argmax(i) for i in y_pred]
+
+
     metrics_dict = classification_report(
-        y_true, 
-        y_pred, 
+        cls_true, 
+        cls_pred, 
         output_dict=True,
         zero_division=0
         )
+    
+
     
     metrics_dict = summary_report(metrics_dict)
 

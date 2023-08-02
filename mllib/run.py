@@ -9,7 +9,7 @@ import argparse
 if __name__=='__main__':
     # recieve args from input
     parser = argparse.ArgumentParser()
-    parser.add_argument('-exp', '--experiment_name',  default="test", type=str)
+    parser.add_argument('-exp', '--experiment_name',  default="000_test", type=str)
     parser.add_argument('-run', '--run_name', default='000_default', type=str)
     parser.add_argument('-m', '--mode', default='train', type=str)
     parser.add_argument('-cfg', '--cfg_dir', default="config/", type=str)

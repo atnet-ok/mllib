@@ -21,20 +21,27 @@ class MllibLogger():
     def log(self, message):
         self.logger.info(message)
 
-    def log_metrics(self, metrics_dict, phase='train',additional_metrics:dict=None,step=None):
+    def log_metrics(
+            self, 
+            metrics_dict, 
+            phase,
+            score,
+            loss_metrics:dict=None,
+            step=None):
 
 
-        if additional_metrics:
-            metrics_dict.update(additional_metrics)
+        if loss_metrics:
+            metrics_dict.update(loss_metrics)
 
+        metrics_and_loss_dict = dict()
         for key,value in metrics_dict.items():
-            key = key + '_' + phase
-            # if ('accuracy' in key) or ('loss' in key):
-            #     self.log(f"{key}:{value}")
+            key_new = key + '/' + phase
+            if (score == key) or ('loss_total' == key):
+                self.log(f"{key_new }:{value}")
+            metrics_and_loss_dict.update({key_new :value})
+            mlflow.log_metric(key=key_new ,value=value,step=step)
 
-            mlflow.log_metric(key=key,value=value,step=step)
-
-        return metrics_dict
+        return metrics_and_loss_dict
 
     def save_model(self, model):
 

@@ -43,8 +43,8 @@ class Trainer(metaclass=ABCMeta):
 
 
 class DLTrainer(Trainer):
-    def __init__(self, cfg, logger, model_trained=None) -> None:
-        super().__init__(cfg, logger, model_trained)
+    def __init__(self, cfg, logger) -> None:
+        super().__init__(cfg, logger,)
 
         
         self.optimizer, self.model = get_optimizer(cfg, self.model)
@@ -63,6 +63,8 @@ class DLTrainer(Trainer):
         if self.task == 'classification':
             self.criterion = nn.CrossEntropyLoss()
             self.score = "accuracy"
+            self.best_score = 0
+            self.score_direction = 1
         elif self.task == 'regression':
             self.criterion = nn.MSELoss()
             self.score = "r2"
@@ -111,7 +113,7 @@ class DLTrainer(Trainer):
 
         metrics_dict = self.metrics(y_pred, y_true)
         metrics_and_loss_dict = self.logger.log_metrics(
-            metrics_dict,phase,loss_dct,epoch
+            metrics_dict, phase, self.score, loss_dct, epoch
             )
         return metrics_and_loss_dict
 
@@ -125,9 +127,13 @@ class DLTrainer(Trainer):
         for epoch in range(self.epoch):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
-            metrics_and_loss_dict = self._update(dl_train, 'train', epoch)
+            _ = self._update(dl_train, 'train', epoch)
             metrics_and_loss_dict = self._update(dl_eval, 'eval', epoch)
-            self.logger.save_model(self.model)
+
+            if (metrics_and_loss_dict[f"{self.score}/eval"] - self.best_score)*self.score_direction>0:
+                self.best_score = metrics_and_loss_dict[f"{self.score}/eval"]
+                self.logger.save_model(self.model)
+                print("best model ever!")
  
 
     def test(self) -> dict:
@@ -174,7 +180,7 @@ trainer_dct = {
     "MLTrainer":MLTrainer
 }
 
-def get_trainer(cfg,logger):
+def get_trainer(cfg, logger):
     if cfg.train.name in trainer_dct.keys():
         trainer = trainer_dct[cfg.train.name](cfg, logger)
     else:
