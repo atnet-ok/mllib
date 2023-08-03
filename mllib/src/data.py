@@ -106,34 +106,6 @@ buildin_dataset = {
 }
 
 def get_dataset(cfg, phase):
-    # if cfg.data.name in buildin_dataset.keys():
-    #     transform = transforms.Compose(
-    #         [
-    #             transforms.ToTensor(),
-    #             transforms.Normalize((0.5, ), (0.5, ))
-    #             ]
-    #             )
-    #     root = __file__.replace("mllib/src/data.py",'')+'data'
-    #     dataset= buildin_dataset[cfg.data.name](
-    #         root=root,
-    #         transform=transform,
-    #         download = True
-    #         )
-
-    #     train_size = int((1-eval_rate) * len(dataset))
-    #     val_size = len(dataset) - train_size
-    #     dataset_train, dataset_eval= random_split(
-    #         dataset, 
-    #         [
-    #             train_size, 
-    #             val_size
-    #             ]
-    #         )
-
-    #     if phase=='train':
-    #         dataset = dataset_train
-    #     else:
-    #         dataset = dataset_eval
 
     if cfg.data.name =="CWRUsyn2real":
         dataset = CWRUsyn2real(
