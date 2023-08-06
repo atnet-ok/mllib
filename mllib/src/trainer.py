@@ -54,20 +54,26 @@ class DLTrainer(Trainer):
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
         if self.task == 'classification':
-            self.criterion = nn.CrossEntropyLoss()
+            self.criterion = nn.CrossEntropyLoss().to(self.device)
             self.score = "accuracy"
             self.best_score = 0
             self.score_direction = 1
         elif self.task == 'regression':
-            self.criterion = nn.MSELoss()
+            self.criterion = nn.MSELoss().to(self.device)
             self.score = "r2"
             self.best_score = 0
             self.score_direction = 1
         elif self.task == 'generation':
-            self.criterion = nn.MSELoss()
+            self.criterion = nn.MSELoss().to(self.device)
             self.score = "MSE"
             self.best_score = 100000
             self.score_direction = -1
+        elif self.task == 'semaseg':
+            #https://zenn.dev/aidemy/articles/a43ebe82dfbb8b
+            self.criterion = nn.BCELoss().to(self.device)
+            self.score = "IoU"
+            self.best_score = 0
+            self.score_direction = 1
 
     def _update(self, dataloader:DataLoader ,phase:str='train', epoch =None) -> dict:
 
@@ -83,8 +89,6 @@ class DLTrainer(Trainer):
         num_batches = len(dataloader)
 
         for data, label in dataloader:
-            # if len(label.shape) == 1:
-            #     label = torch.eye(self.class_num)[label]
             self.optimizer.zero_grad()
             data=data.to(torch.float32).to(self.device)
             label=label.to(self.device)

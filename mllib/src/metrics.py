@@ -9,11 +9,16 @@ def get_metrics(cfg):
         return generation_metrics
     elif task == "regression":
         return regression_metrics
+    elif task == "semaseg":
+        return semaseg_metrics
 
 def regression_metrics(y_pred, y_true):  
     return 0  
 
 def generation_metrics(y_pred, y_true):  
+    return 0  
+
+def semaseg_metrics(y_pred, y_true):  
     return 0  
 
 def classification_metrics(y_pred, y_true):
