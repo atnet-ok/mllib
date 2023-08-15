@@ -9,9 +9,9 @@ from sklearn.model_selection import train_test_split
 import torch
 import numpy as np
 import pandas as pd
-import os
+import cv2
 
-from mllib.src.preprocess import get_transform
+from mllib.src.preprocess import *
 
 class MllibDataset(Dataset):
     def __init__(self, phase, eval_rate, seed) -> None:
@@ -96,6 +96,60 @@ class OfficeHome(MllibDataset):
         path = self.df['path'].iloc[index]
         img = Image.open(path) #torch vision
         return img
+
+
+class CellDataset(Dataset):
+    def __init__(
+            self, image_ids, 
+            dataframe, 
+            data_root="/mnt/d/data/sartorius-cell-instance-segmentation/", 
+            transforms=None, stage='train'):
+        super().__init__()
+        
+        df = pd.read_csv(data_root+ 'train.csv')
+        self.image_ids = image_ids
+        self.dataframe = dataframe
+        self.data_root = data_root
+        self.transforms = transforms
+        self.stage = stage
+
+    def __len__(self):
+        return self.image_ids.shape[0]
+    
+    def __getitem__(self, index):
+        def load_img(path):
+            img_bgr = cv2.imread(path)
+            img_rgb = img_bgr[:, :, ::-1]
+            return img_rgb
+
+        image_id = self.image_ids[index]
+        # Load images
+        image  = load_img(f'{self.data_root}{image_id}.png').astype(np.float32)
+
+        # 3 channels to 1 channel
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        image /= 255.0 # normalization
+
+        # For training and validation
+        if self.stage == 'train':
+            # masks
+            masks = self.dataframe[self.dataframe['id'] == image_id]['annotation'].tolist()
+            mask_image = create_mask_image(image, masks)
+
+            # Transform images and masks
+            if self.transforms:
+                transformed = self.transforms(image=image, mask=mask_image)
+                image, mask_image = transformed['image'], transformed['mask']
+            return image, mask_image, image_id
+        
+        # For test
+        else:
+            # Transform images
+            if self.transforms:
+                image =self.transforms(image=image)['image']
+            
+            return image, image_id
+
 
 
 buildin_dataset = {

@@ -21,7 +21,7 @@ class TestAll(unittest.TestCase):
         cfg = get_config("config/000_default.yaml")
         self.assertEqual(cfg.model.name, 'tf_efficientnet_b7')
 
-    @unittest.skip('skipped')
+    #@unittest.skip('skipped')
     def test_data(self):
         cfg = get_config("config/000_default.yaml")
         dataset_train = get_dataset(cfg, phase='train')
