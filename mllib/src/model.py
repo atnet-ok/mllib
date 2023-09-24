@@ -223,7 +223,7 @@ class UNet(nn.Module):
 
 def get_model(cfg):
     if cfg.train.name == 'DLTrainer':
-        if cfg.model.name in timm.list_models():
+        if cfg.model.name in timm.list_models()+timm.list_models(pretrained=True):
             model = TimmClassifier(
                 model_name = cfg.model.name,
                 class_num = cfg.data.class_num,
