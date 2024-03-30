@@ -1,7 +1,7 @@
 import unittest
 from src.config import * 
 from src.manager import *
-from src.trainer import *
+from src.app.trainer import *
 # python -m unittest tests.test_all
 
 class TestSemaSeg(unittest.TestCase):

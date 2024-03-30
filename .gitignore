@@ -1,14 +1,6 @@
 **/__pycache__/
-mlruns
-/data/**
-!/data/**/.gitkeep
-/model/**
-!/model/**/.gitkeep
-/log/**
-!/log/**/.gitkeep
-config/*
-tests/data/log/*
-tests/data/model/*
+*.pyc
 test.py
 **/*.pkl
-ssd/
+expr/**/outputs/
+expr/**/mlruns/

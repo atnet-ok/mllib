@@ -1,10 +1,10 @@
 ### for training class
 from abc import ABCMeta, abstractmethod
-from src.data import *
-from src.model import *
-from src.optimizer import *
-from src.logger import *
-from src.metrics import *
+from src.domain.dataset import *
+from src.domain.model import *
+from src.common.optimizer import *
+from src.common.logger import *
+from src.common.metrics import *
 import torch
 import numpy as np
 import warnings

@@ -1,0 +1,32 @@
+train:
+  device: cuda:0
+  epoch: 3
+  name: DLTrainer
+  task: classification
+  seed: 42
+  amp: true
+  optimizer: 
+    name: adam
+    lr: 0.0004
+    wd: 0.0001
+    scheduler: cosine_warmup
+    momentum: 0.9
+dataset:
+  batch_size_eval: 32
+  batch_size_train: 32
+  class_num: 65
+  data_size: 224
+  name: OfficeHome
+  seed: 42
+  num_workers: 4
+  other:
+    a: 1
+    b: 2
+model:
+  in_chans: 3
+  name: tf_efficientnet_b7 #swin_base_patch4_window7_224_in22k, 'tf_efficientnetv2_l_in21ft1k'
+  pre_train: true
+logger:
+  log_dir: ./log/
+  experiment_name: 000_example
+  run_id: 20xx-xx-xx_test 

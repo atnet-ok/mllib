@@ -1,8 +1,8 @@
 import os
 import mlflow
-from src.logger import MllibLogger
+from src.common.logger import MllibLogger
 from src.config import *
-from src.trainer import *
+from src.app.trainer import *
 
 class Manager():
     def __init__(self,args) -> None:
@@ -44,3 +44,11 @@ class Manager():
         mlflow.log_artifact(self.config_path)
         mlflow.end_run()
 
+
+if __name__ =="__main__":
+
+
+    manager = Manager(args)
+    cfg, logger = manager.set_experiment()
+    manager.start_experiment(cfg, logger)
+    manager.end_experiment()
