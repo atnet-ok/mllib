@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import cv2
 
-from mllib.src.preprocess import *
+from src.preprocess import *
 
 class MllibDataset(Dataset):
     def __init__(self, phase, eval_rate, seed) -> None:

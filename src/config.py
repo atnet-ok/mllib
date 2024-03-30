@@ -1,6 +1,6 @@
 from dataclasses import dataclass, fields, asdict
 from typing import get_type_hints
-from mllib.src.utils import *
+from src.utils import *
 
 import os
 

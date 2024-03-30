@@ -1,8 +1,8 @@
 import sys
 sys.path.append(__file__.replace("mllib/run.py",''))
 
-from mllib.src.manager import *
-from mllib.src.utils import *
+from src.manager import *
+from src.utils import *
 
 import argparse
 

@@ -1,5 +1,5 @@
 from cloudpickle import dump, load
-from mllib.src.config import *
+from src.config import *
 # from joblib import dump, load
 # from pickle import dump, load
 import logging

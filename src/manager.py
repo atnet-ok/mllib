@@ -1,8 +1,8 @@
 import os
 import mlflow
-from mllib.src.logger import MllibLogger
-from mllib.src.config import *
-from mllib.src.trainer import *
+from src.logger import MllibLogger
+from src.config import *
+from src.trainer import *
 
 class Manager():
     def __init__(self,args) -> None:

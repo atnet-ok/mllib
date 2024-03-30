@@ -1,6 +1,7 @@
 from torchvision import transforms
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+import numpy as np
 
 def create_mask_image(image, masks):
     """Create a mask image from RLE.
