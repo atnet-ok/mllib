@@ -6,6 +6,7 @@ jobs:
     runs-on: self-hosted
     container: #起動するコンテナイメージを指定
       image: nvcr.io/nvidia/modulus/modulus:24.01 #指定のdockerイメージを使用
+      options: --gpus all
     steps:
       - run: echo "Hello World!"
       - run: nvidia-smi
