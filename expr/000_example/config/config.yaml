@@ -14,9 +14,10 @@ train:
 dataset:
   batch_size_eval: 32
   batch_size_train: 32
+  dataset_load_dir: none
   class_num: 65
   data_size: 224
-  name: OfficeHome
+  name: MNIST
   seed: 42
   num_workers: 4
   other:

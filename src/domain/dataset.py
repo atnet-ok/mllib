@@ -1,6 +1,6 @@
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Dataset
-from torchvision.datasets import ImageNet,MNIST,FashionMNIST,Caltech101
+from torchvision.datasets import DTD,Country211,MNIST
 
 from torch.utils.data import random_split
 from PIL import Image
@@ -24,13 +24,36 @@ class MllibDataset(object):
         transform = None
         target_transform = None
 
-        self.dataset =dataset_dict[self.cfg.name](
-                root=None,
-                train= True if phase=="train" else False,
-                transform=transform,
-                target_transform=target_transform,
-                download=None
-        )
+        if self.cfg.name in bildin_dataset_dict.keys():
+
+            dataset = bildin_dataset_dict[self.cfg.name](
+                    root=self.cfg.load_dir,
+                    transform=transform,
+                    target_transform=target_transform,
+                    download=True
+                    )
+            val_size = int(self.cfg.eval_rate * len(dataset))
+            train_size = len(dataset) - val_size
+            dataset_train, dataset_test = random_split(
+                    dataset, 
+                    [train_size, val_size],
+                    generator=torch.Generator().manual_seed(self.cfg.seed)
+                )
+            
+            return dataset_train if phase=="train" else dataset_test
+
+            
+        elif self.cfg.name in custom_dataset_dict.keys():
+            dataset = custom_dataset_dict[self.cfg.name](
+                    root=self.cfg.load_dir,
+                    transform=transform,
+                    target_transform=target_transform,
+                    phase=phase
+                    )
+            return dataset
+        
+        else:
+            print("!!!")
 
     def get_dataset(self, phase:str):
         dataset = self._load_dataset(phase)
@@ -64,24 +87,28 @@ class MllibDataset(object):
         return loader
 
 
-class OriginalDataset(Dataset):
+class CustomDataset(Dataset):
     def __init__(self, 
                  root: str, 
-                 train: bool = True, 
+                 phase: bool = True, 
                  transform: Optional[Callable] = None, 
                  target_transform: Optional[Callable] = None, 
-                 download: bool = False) -> None:
+                 ) -> None:
         super().__init__()
-        self.dataset_path = root
-        self.is_train = train
-        self.is_download = download
+        self.load_dir = root
+        self.phase = phase
         self.transform = transform
         self.target_transform = target_transform
 
 
-dataset_dict = {
-    "FashionMNIST":FashionMNIST,
+
+
+bildin_dataset_dict = {
     "MNIST":MNIST,
-    "Caltech101":Caltech101,
-    "ImageNet":ImageNet
+    "Country211":Country211,
+    "DTD":DTD
+}
+
+custom_dataset_dict = {
+    
 }

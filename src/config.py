@@ -7,49 +7,54 @@ import os
 
 @dataclass
 class model_cfg:
-    name: str=None
-    pre_train:bool =None
-    in_chans:int=None
-    model_trained:str=None
+    name: str="tf_efficientnet_b7"
+    pre_train:bool =True
+    in_chans:int=3
+    model_trained:str=False
     other:dict = None
 
 @dataclass
 class dataset_cfg:
-    name:str=None
-    batch_size_train:int = None
-    batch_size_eval:int = None
+    name:str="MNIST"
+    batch_size_train:int = 32
+    batch_size_eval:int = 32
     class_num:int = None
     data_size:int = None #listの方が画像やセンサデータにも対応できてよい？
-    eval_rate:float= None
-    num_workers:int=None
+    eval_rate:float= 0.2
+    num_workers:int=4
+    load_dir:str="/mnt/d/data/"
+    seed:int=42
     other:dict = None
-    seed:int=None
+
+@dataclass
+class preprocess_cfg:
+    name:str="general_image_preprocess"
 
 @dataclass
 class optimizer_cfg:
-    name:str=None
-    lr:float=None
-    wd:float=None
-    momentum:float=None
-    scheduler:str=None
+    name:str="adam"
+    lr:float=0.0004
+    wd:float=0.0001
+    momentum:float=0.9
+    scheduler:str="cosine_warmup"
+    other:dict = None
 
 @dataclass
-class train_cfg:
-    name:str=None
-    task:str=None
-    seed:int=None
-    epoch:int =None
-    optimizer:optimizer_cfg=None
-    device:str=None
-    amp:bool=None
-    method:str=None 
+class trainer_cfg:
+    name:str="DLTrainer"
+    task:str="classification"
+    seed:int=42
+    epoch:int=50
+    optimizer:optimizer_cfg=optimizer_cfg()
+    device:str="cuda:0"
+    amp:bool=True
     other:dict = None
 
 @dataclass
 class logger_cfg:
-    log_dir:str=None
-    experiment_name:str=None
-    run_id:str=None
+    log_dir:str="./log/"
+    experiment_name:str="test"
+    run_id:str="test"
 
 
 

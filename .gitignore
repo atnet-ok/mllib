@@ -2,5 +2,6 @@
 *.pyc
 test.py
 **/*.pkl
-expr/**/outputs/
-expr/**/mlruns/
+expr/
+!expr/000_example/config
+!expr/000_example/main.py
