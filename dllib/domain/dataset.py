@@ -10,36 +10,20 @@ import torch
 import numpy as np
 import pandas as pd
 import os
-from typing import Union,Optional,Callable
-
-from dllib.common.preprocess import get_preprocess
 from dllib.config import dataset_cfg,dataloader_cfg
-
-
-# class MllibDataset(Dataset):
-#     def __init__(self, 
-#                 root_dir:str,
-#                 preprocess:Optional[Callable],
-#                 target_transform:Optional[Callable],
-#                 phase:str,
-#                 eval_rate:float,
-#                 others:dict
-#                  ) -> None:
-
-#         pass
-
+from abc import ABC, abstractmethod
 
 
 class Birdclef2024Dataset(Dataset):
     def __init__(
             self, 
             root_dir:str,
-            preprocess:Optional[Callable],
-            target_transform:Optional[Callable],
             phase:str,
             eval_rate:float,
             others:dict
                 ) -> None:
+        
+        self.root_dir = root_dir
         
         self.df = pd.read_csv(os.path.join(root_dir,"train_metadata.csv"))
 
@@ -51,13 +35,9 @@ custom_dataset_dict = {
 
 def get_dataset(dataset_cfg:dataset_cfg,phase:str):
 
-    preprocess,target_transform = get_preprocess(dataset_cfg.preprocess)
-
     if dataset_cfg.name in custom_dataset_dict.keys():
         dataset = custom_dataset_dict[dataset_cfg.name](
-                root=dataset_cfg.root_dir,
-                preprocess=preprocess,
-                target_transform=target_transform,
+                root_dir=dataset_cfg.root_dir,
                 phase=phase,
                 eval_rate=dataset_cfg.eval_rate,
                 others=dataset_cfg.others

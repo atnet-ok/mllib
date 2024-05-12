@@ -5,8 +5,8 @@ from dllib.config import *
 import logging
 import mlflow
 
-class MllibLogger():
-    def __init__(self, experiment_name, log_path, model_path) -> None:
+class DllibLogger():
+    def __init__(self, experiment_name, log_dir, model_path) -> None:
 
 
         print(log_path)

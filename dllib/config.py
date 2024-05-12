@@ -11,9 +11,6 @@ class model_cfg:
     model_trained:str=False
     others:dict = None
 
-@dataclass
-class preprocess_cfg:
-    name:str="general_image_preprocess"
 
 @dataclass
 class dataset_cfg:
@@ -22,7 +19,6 @@ class dataset_cfg:
     eval_rate:float= 0.2
     root_dir:str="/mnt/d/data/"
     others:dict = None
-    preprocess:preprocess_cfg=preprocess_cfg()
 
 @dataclass
 class dataloader_cfg:

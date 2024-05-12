@@ -40,8 +40,8 @@ class DLTrainer(Trainer):
         super().__init__(cfg, logger,)
 
         
-        self.optimizer, self.model = get_optimizer(cfg, self.model)
-        self.scheduler, self.optimizer = get_scheduler(cfg, self.optimizer)
+        self.optimizer,  self.scheduler, self.model = get_optimizer(cfg, self.model)
+
 
         self.class_num = cfg.data.class_num
         self.epoch = cfg.train.epoch
