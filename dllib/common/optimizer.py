@@ -2,11 +2,13 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR,StepLR
 from timm.scheduler import CosineLRScheduler
 
-def get_optimizer(cfg,model):
-    opt = cfg.train.optimizer
-    lr = cfg.train.lr
-    weight_decay = cfg.train.wd if cfg.train.wd else 0
-    momentum = cfg.train.momentum if cfg.train.momentum else 0
+from dllib.config import optimizer_cfg
+
+def get_optimizer(optimizer_cfg:optimizer_cfg,model):
+    opt = optimizer_cfg.name
+    lr = optimizer_cfg.lr
+    weight_decay = optimizer_cfg.wd if optimizer_cfg.wd else 0
+    momentum = optimizer_cfg.momentum if optimizer_cfg.momentum else 0
 
     if opt == 'sgd':
         optimizer = optim.SGD(
@@ -48,30 +50,30 @@ def get_optimizer(cfg,model):
             momentum=momentum, 
             centered=False)
 
-    return optimizer, model
+    sche = optimizer_cfg.scheduler
+    sche_cycle =optimizer_cfg.sche_cycle
 
-def get_scheduler(cfg,optimizer):
-    sche =  cfg.train.scheduler
-    epoch =cfg.train.epoch
-    lr = cfg.train.lr
-    
     if sche=='cosine_warmup':
         scheduler = CosineLRScheduler(
                 optimizer, 
-                t_initial=epoch , 
+                t_initial=sche_cycle , 
                 lr_min=lr*1e-1, 
-                warmup_t=int(epoch/5), 
+                warmup_t=int(sche_cycle/5), 
                 warmup_lr_init=lr*1e-1, 
                 warmup_prefix=True
                 )
+        
     elif sche=='cosine':
         scheduler = CosineAnnealingLR(
             optimizer, 
             eta_min=1e-4, 
-            T_max= epoch)
+            T_max= sche_cycle)
+        
     elif sche=='step':
         scheduler = StepLR(optimizer, step_size=7, gamma=0.1)
-    else:
-        scheduler = StepLR(optimizer, step_size=epoch, gamma=0.1)
 
-    return scheduler, optimizer
+    else:
+        scheduler = StepLR(optimizer, step_size=sche_cycle, gamma=0.1)
+
+    return optimizer,scheduler, model
+

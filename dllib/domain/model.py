@@ -1,11 +1,9 @@
 from torch import nn
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
 import torch.nn.functional as F
 import timm
 import torch
+
+from dllib.config import model_cfg
 
 class TimmClassifier(nn.Module):
     def __init__(self, model_name, class_num, pre_train,in_chans):
@@ -221,40 +219,17 @@ class UNet(nn.Module):
         x = torch.sigmoid(x)
         return x
 
-def get_model(cfg):
-    if cfg.train.name == 'DLTrainer':
-        if cfg.model.name in timm.list_models()+timm.list_models(pretrained=True):
-            model = TimmClassifier(
-                model_name = cfg.model.name,
-                class_num = cfg.data.class_num,
-                pre_train = cfg.model.pre_train,
-                in_chans = cfg.model.in_chans
-                )
-        elif cfg.model.name=="TestNet":
-            model = TestNet()
-        elif cfg.model.name=="UNet":
-            model = UNet()
-        elif cfg.model.name=="CNN1d":
-            model = CNN1d(
-                input_channels=cfg.model.in_chans, 
-                num_classes=cfg.data.class_num
-                )
-        else:
-            raise Exception(f'{cfg.model.name} in not implemented')
+def get_model(model_cfg:model_cfg):
 
-    elif cfg.train.name in ['MLTrainer', 'MLSDATrainer']:
-        if cfg.model.name == "RandomForestClassifier":
-            model = RandomForestClassifier()
-        elif cfg.model.name == "SVC":
-            model = SVC()
-        elif cfg.model.name == "GradientBoostingClassifier":
-            model = GradientBoostingClassifier(
-                verbose=1
+    if model_cfg.name in timm.list_models()+timm.list_models(pretrained=True):
+        model = TimmClassifier(
+            model_name = model_cfg.name,
+            class_num = model_cfg.class_num,
+            pre_train = model_cfg.pre_train,
+            in_chans = model_cfg.in_chans
             )
-        elif cfg.model.name == "LogisticRegression":
-            model = LogisticRegression(
-                penalty='l2'
-            )
-        else:
-            raise Exception(f'{cfg.model.name} in not implemented')      
+
+    else:
+        raise Exception(f'{model_cfg.name} in not implemented')
+    
     return model

@@ -1,4 +1,4 @@
-from src.config import *
+from dllib.config import *
 
 @dataclass
 class config:

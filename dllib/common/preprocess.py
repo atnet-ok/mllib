@@ -1,6 +1,6 @@
 from torchvision import transforms
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
+# import albumentations as A
+# from albumentations.pytorch import ToTensorV2
 import numpy as np
 
 def create_mask_image(image, masks):
@@ -46,7 +46,7 @@ def decode_rle(rle, height, width):
         img[lo:hi] = 1 # brightness
     return img.reshape((height, width)) 
 
-def get_transform(img_size,phase='train',task="classification"):
+def get_preprocess(img_size,phase='train',task="classification"):
 
     if task == "classification":
         if phase=='train':
@@ -80,21 +80,21 @@ def get_transform(img_size,phase='train',task="classification"):
 
             return  transform 
     
-    elif task == "semaseg":
-        if phase=='train':
-            transform = [
-                A.Resize(img_size,img_size,p=1),
-                A.HorizontalFlip(p=0.5),
-                A.Transpose(p=0.5),
-                ToTensorV2(p=1)
-            ]
-            return A.Compose(transform)
+    # elif task == "semaseg":
+    #     if phase=='train':
+    #         transform = [
+    #             A.Resize(img_size,img_size,p=1),
+    #             A.HorizontalFlip(p=0.5),
+    #             A.Transpose(p=0.5),
+    #             ToTensorV2(p=1)
+    #         ]
+    #         return A.Compose(transform)
 
 
-        # Validation images undergo only resizing.
-        else:
-            transform = [
-                A.Resize(img_size,img_size,p=1),
-                ToTensorV2(p=1)
-            ]
-            return A.Compose(transform)
+    #     # Validation images undergo only resizing.
+    #     else:
+    #         transform = [
+    #             A.Resize(img_size,img_size,p=1),
+    #             ToTensorV2(p=1)
+    #         ]
+    #         return A.Compose(transform)

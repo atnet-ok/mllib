@@ -1,8 +1,10 @@
 from sklearn.metrics import classification_report, accuracy_score, f1_score
 import numpy as np
+from dllib.config import metrics_cfg
 
-def get_metrics(cfg):
-    task = cfg.train.task
+def get_metrics(metrics_cfg:metrics_cfg):
+    task = metrics_cfg.task
+
     if task == "classification":
         return classification_metrics
     elif task == "generation":
@@ -52,7 +54,6 @@ def classification_metrics(y_pred, y_true):
     cls_true = [np.argmax(i) for i in y_true]
     cls_pred = [np.argmax(i) for i in y_pred]
 
-
     metrics_dict = classification_report(
         cls_true, 
         cls_pred, 
@@ -61,7 +62,6 @@ def classification_metrics(y_pred, y_true):
         )
     
 
-    
     metrics_dict = summary_report(metrics_dict)
 
     return metrics_dict

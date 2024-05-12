@@ -1,5 +1,5 @@
 from cloudpickle import dump, load
-from src.config import *
+from dllib.config import *
 # from joblib import dump, load
 # from pickle import dump, load
 import logging

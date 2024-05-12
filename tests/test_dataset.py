@@ -1,5 +1,5 @@
 import unittest
-from src.config import dataset_cfg
+from dllib.config import dataset_cfg
 # from src.manager import *
 # from src.app.trainer import *
 # python -m unittest tests.test_dataset
