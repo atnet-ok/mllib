@@ -1,57 +1,31 @@
-from cloudpickle import dump, load
 from dllib.config import *
-# from joblib import dump, load
-# from pickle import dump, load
-import logging
 import mlflow
 
-class DllibLogger():
-    def __init__(self, experiment_name, log_dir, model_path) -> None:
+class Logger():
+    def __init__(self, logger_cfg:logger_cfg) -> None:
+
+        mlflow.set_experiment(experiment_name=logger_cfg.experiment_name)
+        mlflow.set_tracking_uri(logger_cfg.log_uri)
+
+        with mlflow.start_run(run_name=logger_cfg.run_name) as run:
+            self.run_id = run.info.run_id
 
 
-        print(log_path)
-        self.model_path = model_path
-        self.logger =  logging.getLogger(experiment_name)
-        sh = logging.StreamHandler()
-        fh = logging.FileHandler(log_path)
-        self.logger.addHandler(sh)
-        self.logger.addHandler(fh)
-        self.logger.setLevel(logging.DEBUG)
+    def log_metrics(self,metrics):
+        with mlflow.start_run(run_id=self.run_id):
+            mlflow.log_metrics(metrics=metrics)
 
-    def log(self, message):
-        self.logger.info(message)
+    def log_params(self,params):
+        with mlflow.start_run(run_id=self.run_id):
+            mlflow.log_params(params=params)
 
-    def log_metrics(
-            self, 
-            metrics_dict, 
-            phase,
-            score,
-            loss_metrics:dict=None,
-            step=None):
+    def log_artifacts(self,file_path):
+        with mlflow.start_run(run_id=self.run_id):
+            mlflow.log_artifacts(local_dir=file_path)
+
+    def log_model(self, model,model_name):
+
+        mlflow.pytorch.log_model(model, model_name)
 
 
-        if loss_metrics:
-            metrics_dict.update(loss_metrics)
-
-        metrics_and_loss_dict = dict()
-        for key,value in metrics_dict.items():
-            key_new = key + '/' + phase
-            if (score == key) or ('loss_total' == key):
-                self.log(f"{key_new }:{value}")
-            metrics_and_loss_dict.update({key_new :value})
-            mlflow.log_metric(key=key_new ,value=value,step=step)
-
-        return metrics_and_loss_dict
-
-    def save_model(self, model):
-
-        with open(self.model_path, 'wb') as f:
-            dump(model, f)
-        mlflow.log_artifact(self.model_path)
-
-    def load_model(self, model_path):
-        mlflow.log_artifact(model_path)
-        with open(model_path, 'rb') as f:
-            model = load(f)
-        return model
 

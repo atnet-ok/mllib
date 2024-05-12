@@ -55,11 +55,9 @@ class trainer_cfg:
 
 @dataclass
 class logger_cfg:
-    log_dir:str="./log/"
+    log_uri:str="./.log/"
     experiment_name:str="test"
     run_name:str="test"
-
-
 
 # def get_config(config_path):
 
