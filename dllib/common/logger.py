@@ -8,21 +8,15 @@ class Logger():
             logger_cfg:logger_cfg=logger_cfg()
             ) -> None:
 
-        import warnings
-
-        warnings.simplefilter('ignore', DeprecationWarning)
-        warnings.simplefilter('ignore', UserWarning)
-
-
         mlflow.set_tracking_uri(logger_cfg.log_uri)
         mlflow.set_experiment(experiment_name=logger_cfg.experiment_name)
 
         with mlflow.start_run(run_name=logger_cfg.run_name) as run:
             self.run_id = run.info.run_id
 
-    def log_metrics(self,metrics):
+    def log_metrics(self,metrics,step):
         with mlflow.start_run(run_id=self.run_id):
-            mlflow.log_metrics(metrics=metrics)
+            mlflow.log_metrics(metrics=metrics,step=step)
 
     def log_params(self,params):
         with mlflow.start_run(run_id=self.run_id):

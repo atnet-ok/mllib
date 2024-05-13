@@ -16,7 +16,8 @@ class dataset_cfg:
     root_dir:str="/mnt/d/data/"
     others = {
         "img_size":224,
-        "class_num":10}
+        "class_num":10
+        }
 
 @dataclass
 class dataloader_cfg:

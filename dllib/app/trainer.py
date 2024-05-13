@@ -87,21 +87,25 @@ class Trainer(object):
         dataset_eval = get_dataset(self.cfg.dataset,phase='eval')
         dataloader_train = get_dataloader(dataset_train,self.cfg.dataloader, 'train')
         dataloader_eval = get_dataloader(dataset_eval,self.cfg.dataloader, 'eval')
+        dl_dct = {"train":dataloader_train,"eval":dataloader_eval}
 
         for epoch in range(self.epoch):
             print(f"--------------------------------------")
             print(f"Epoch {epoch+1}")
 
             for phase in ["train", "eval"]:
-                metrics, loss = self._update(dataloader_train, phase, epoch)
-                print(f"{phase}/loss:{loss}")
-                print(f"{phase}/metrics:{metrics}")
-
+                metrics, loss = self._update(dl_dct[phase], phase, epoch)
+                print(f"loss/{phase}:{loss}")
+                print(f"metrics/{phase}:{metrics}")
+                self.logger.log_metrics({f"loss/{phase}":loss},step=epoch)
+                self.logger.log_metrics({f"metrics/{phase}":metrics},step=epoch)
 
             if self.best_loss > loss:
                 self.best_loss = loss
-                self.logger.log_model(model=self.model,model_name="{:03}_epoch".format(epoch))
+                self.logger.log_model(model=self.model,model_name="model_best")
                 print("best model ever!")
+
+        self.logger.log_model(model=self.model,model_name="model_last")
 
     def test(self):
         dataset_test = get_dataset(self.cfg.model, phase='test')

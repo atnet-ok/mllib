@@ -7,7 +7,8 @@ if module_path not in sys.path:
 
 import hydra
 from omegaconf import OmegaConf
-from config.config import config
+
+
 
 
 @hydra.main(config_name="config", version_base=None, config_path="config")
