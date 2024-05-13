@@ -6,7 +6,7 @@ import torch
 from dllib.config import model_cfg
 
 class TimmClassifier(nn.Module):
-    def __init__(self, model_name, class_num, pre_train,in_chans):
+    def __init__(self, model_name, out_dim, pre_train,in_chans):
         super(TimmClassifier, self).__init__()
 
         # for timm
@@ -18,7 +18,7 @@ class TimmClassifier(nn.Module):
         )
         in_features = self.backbone.num_features
 
-        self.head = nn.Linear(in_features, class_num)
+        self.head = nn.Linear(in_features, out_dim)
 
     def forward(self, x):
         features = self.backbone(x)
@@ -224,7 +224,7 @@ def get_model(model_cfg:model_cfg):
     if model_cfg.name in timm.list_models()+timm.list_models(pretrained=True):
         model = TimmClassifier(
             model_name = model_cfg.name,
-            class_num = model_cfg.class_num,
+            out_dim = model_cfg.out_dim,
             pre_train = model_cfg.pre_train,
             in_chans = model_cfg.in_chans
             )

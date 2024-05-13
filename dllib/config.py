@@ -7,8 +7,8 @@ from dllib.common.utils import *
 class model_cfg:
     name: str="tf_efficientnet_b7"
     pre_train:bool =True
-    in_chans:int=3
-    model_trained:str=False
+    in_chans:int=1
+    out_dim:int=10
     others:dict = None
 
 
@@ -18,7 +18,7 @@ class dataset_cfg:
     # data_dim:tuple = None # eg. for 256*256 color imgae, define as (3,256,256)
     eval_rate:float= 0.2
     root_dir:str="/mnt/d/data/"
-    others:dict = None
+    others = {"img_size":224}
 
 @dataclass
 class dataloader_cfg:

@@ -5,3 +5,5 @@ test.py
 expr/
 !expr/000_example/config
 !expr/000_example/main.py
+
+.log/

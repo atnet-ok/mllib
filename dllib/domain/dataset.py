@@ -1,6 +1,7 @@
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import DTD,Country211,MNIST
+from torchvision import transforms
 
 from torch.utils.data import random_split
 from PIL import Image
@@ -11,7 +12,6 @@ import numpy as np
 import pandas as pd
 import os
 from dllib.config import dataset_cfg,dataloader_cfg
-from abc import ABC, abstractmethod
 
 
 class Birdclef2024Dataset(Dataset):
@@ -24,13 +24,48 @@ class Birdclef2024Dataset(Dataset):
                 ) -> None:
         
         self.root_dir = root_dir
+        self.df = pd.read_csv(
+            os.path.join(root_dir,"train_metadata.csv")
+            )
         
-        self.df = pd.read_csv(os.path.join(root_dir,"train_metadata.csv"))
+    def get_preprocesser(self):
+        return None
 
+class MNIST_(Dataset):
+    def __init__(
+            self, 
+            root_dir:str,
+            phase:str,
+            eval_rate:float,
+            others:dict
+                ) -> None:
+
+        img_size = others["img_size"]
+            
+        self.dataset = MNIST(
+            root=root_dir,
+            train=True if phase=="train" else False,
+            transform=self.get_preprocesser(),
+            download=True
+        )
+
+    def get_preprocesser(self):
+        transform  = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])
+        return  transform 
+
+    def __len__(self):
+        return self.dataset.__len__()
+
+    def __getitem__(self, index):
+        return self.dataset.__getitem__(index)
 
 
 custom_dataset_dict = {
-    "Birdclef2024":Birdclef2024Dataset
+    "Birdclef2024":Birdclef2024Dataset,
+    "MNIST":MNIST_
 }
 
 def get_dataset(dataset_cfg:dataset_cfg,phase:str):
