@@ -1,18 +1,42 @@
 from sklearn.metrics import classification_report, accuracy_score, f1_score
 import numpy as np
-from dllib.config import metrics_cfg
+from  torch import nn
 
-def get_metrics(metrics_cfg:metrics_cfg):
-    task = metrics_cfg.task
+
+def get_metrics(task):
 
     if task == "classification":
-        return classification_metrics
+        criterion = nn.CrossEntropyLoss()
+        score = "accuracy"
+        best_score = 0
+        score_direction = 1
+        metrics =  classification_metrics
+    
     elif task == "generation":
-        return generation_metrics
+        criterion = nn.MSELoss()
+        score = "MSE"
+        best_score = 100000
+        score_direction = -1
+        metrics = generation_metrics
+
     elif task == "regression":
-        return regression_metrics
+        criterion = nn.MSELoss()
+        score = "r2"
+        best_score = 0
+        score_direction = 1
+
     elif task == "semaseg":
-        return semaseg_metrics
+        #https://zenn.dev/aidemy/articles/a43ebe82dfbb8b
+        criterion = nn.BCELoss()
+        score = "IoU"
+        best_score = 0
+        score_direction = 1
+        metrics = semaseg_metrics
+
+    return metrics, criterion
+
+
+
 
 def regression_metrics(y_pred, y_true):  
     return 0  

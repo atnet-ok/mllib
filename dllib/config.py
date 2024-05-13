@@ -36,9 +36,6 @@ class optimizer_cfg:
     sche_cycle:int=40
     others:dict = None
 
-@dataclass
-class metrics_cfg:
-    task:str="classification"
 
 @dataclass
 class trainer_cfg:
@@ -47,7 +44,7 @@ class trainer_cfg:
     device:str="cuda:0"
     amp:bool=True
     others:dict = None
-    metrics:metrics_cfg=metrics_cfg()
+    task:str = "classification"
     optimizer:optimizer_cfg=optimizer_cfg()
     dataset:dataset_cfg=dataset_cfg()
     model:model_cfg=model_cfg()

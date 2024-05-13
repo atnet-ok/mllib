@@ -4,77 +4,43 @@ from dllib.domain.dataset import *
 from dllib.domain.model import *
 from dllib.common.optimizer import *
 from dllib.common.logger import *
-from dllib.common.metrics import *
+from dllib.domain.metrics import *
 import torch
 import numpy as np
 import warnings
 
-class Trainer(metaclass=ABCMeta):
-    def __init__(self, cfg, logger) -> None:
-        warnings.simplefilter('ignore', DeprecationWarning)
-        warnings.simplefilter('ignore', UserWarning)
 
-        model_trained = cfg.model.model_trained
-        if model_trained:
-            self.model = logger.load_model(model_trained)
-        else:
-            self.model = get_model(cfg)
-        self.cfg = cfg
+class Trainer(object):
+    def __init__(
+            self, 
+            trainer_cfg:trainer_cfg=trainer_cfg(), 
+            logger:Logger=Logger()
+            ) -> None:
+
+        # warnings.simplefilter('ignore', DeprecationWarning)
+        # warnings.simplefilter('ignore', UserWarning)
+
+        self.cfg = trainer_cfg
         self.logger = logger
-        self.metrics = get_metrics(cfg)
-        self.task = cfg.train.task
 
-    @abstractmethod
-    def train(self) -> object:
-        pass  
+        self.model = get_model(self.cfg.model)
+        self.metrics, self.criterion = get_metrics(self.cfg.task)
 
-    @abstractmethod
-    def test(self) -> dict:
-        pass  
+        self.optimizer,  self.scheduler, self.model = get_optimizer(
+            self.cfg.optimizer, 
+            self.model
+            )
 
-
-
-
-class DLTrainer(Trainer):
-    def __init__(self, cfg, logger) -> None:
-        super().__init__(cfg, logger,)
-
-        
-        self.optimizer,  self.scheduler, self.model = get_optimizer(cfg, self.model)
-
-
-        self.class_num = cfg.data.class_num
-        self.epoch = cfg.train.epoch
-        self.device = cfg.train.device
-        self.amp = cfg.train.amp #True
+        self.epoch = self.cfg.epoch
+        self.device = self.cfg.device
+        self.amp = self.cfg.amp #True
 
         self.model = self.model.to(self.device)
+        self.criterion = self.criterion.to(self.device)
         #self.model = torch.compile(self.model) #for pytorch 2.0
 
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         
-        if self.task == 'classification':
-            self.criterion = nn.CrossEntropyLoss().to(self.device)
-            self.score = "accuracy"
-            self.best_score = 0
-            self.score_direction = 1
-        elif self.task == 'regression':
-            self.criterion = nn.MSELoss().to(self.device)
-            self.score = "r2"
-            self.best_score = 0
-            self.score_direction = 1
-        elif self.task == 'generation':
-            self.criterion = nn.MSELoss().to(self.device)
-            self.score = "MSE"
-            self.best_score = 100000
-            self.score_direction = -1
-        elif self.task == 'semaseg':
-            #https://zenn.dev/aidemy/articles/a43ebe82dfbb8b
-            self.criterion = nn.BCELoss().to(self.device)
-            self.score = "IoU"
-            self.best_score = 0
-            self.score_direction = 1
-
     def _update(self, dataloader:DataLoader ,phase:str='train', epoch =None) -> dict:
 
         if phase == 'train':
@@ -97,7 +63,7 @@ class DLTrainer(Trainer):
                 with torch.cuda.amp.autocast(
                     enabled=(self.amp and (phase == 'train'))
                     ):
-                    y, z = self.model(data)
+                    y = self.model(data)
                     loss = self.criterion(y,label)
 
             if phase == 'train':
@@ -118,84 +84,38 @@ class DLTrainer(Trainer):
             )
         return metrics_and_loss_dict
 
-    def _infer(self):
-        pass
-
     def train(self) -> dict:
 
-        dataset_train = get_dataset(self.cfg,phase='train')
-        dataset_eval = get_dataset(self.cfg,phase='eval')
-        dl_train = get_dataloader(self.cfg, 'train',dataset_train)
-        dl_eval = get_dataloader(self.cfg, 'eval',dataset_eval)
+        dataset_train = get_dataset(self.cfg.dataset,phase='train')
+        dataset_eval = get_dataset(self.cfg.dataset,phase='eval')
+        dataloader_train = get_dataloader(dataset_train,self.cfg.dataloader, 'train')
+        dataloader_eval = get_dataloader(dataset_eval,self.cfg.dataloader, 'eval')
 
         for epoch in range(self.epoch):
             self.logger.log(f"--------------------------------------")
             self.logger.log(f"Epoch {epoch+1}")
-            _ = self._update(dl_train, 'train', epoch)
-            metrics_and_loss_dict = self._update(dl_eval, 'eval', epoch)
+            _ = self._update(dataloader_train, 'train', epoch)
+            metrics_and_loss_dict = self._update(dataloader_eval, 'eval', epoch)
 
             if (metrics_and_loss_dict[f"{self.score}/eval"] - self.best_score)*self.score_direction>0:
                 self.best_score = metrics_and_loss_dict[f"{self.score}/eval"]
-                self.logger.save_model(self.model)
+                self.logger.log_model(self.model)
                 print("best model ever!")
  
 
     def test(self) -> dict:
-        dataset_test = get_dataset(self.cfg, phase='test')
-        dl_test = get_dataloader(self.cfg, 'test', dataset_test)
+        dataset_test = get_dataset(self.cfg.model, phase='test')
+        dl_test = get_dataloader(dataset_test, self.cfg.model, 'test')
         metrics_and_loss_dict = self._update( dl_test, 'test')
 
+# trainer_dct = {
+#     "Trainer":Trainer
+# }
 
-class MLTrainer(Trainer):
-    def __init__(self, cfg, logger, model_trained=None) -> None:
-        super().__init__(cfg, logger, model_trained)
-        self.cfg = cfg
-
-    def train(self) -> dict:
-        dataset_train = get_dataset(self.cfg,phase='train', eval_rate=self.cfg.data.eval_rate)
-        dataset_eval = get_dataset(self.cfg,phase='eval', eval_rate=self.cfg.data.eval_rate)
-
-        X_train, y_train = self._dataset2np(dataset_train)
-        X_eval, y_eval = self._dataset2np(dataset_eval)
-
-        self.model.fit(X_train, y_train)
-
-        y_pred = self.model.predict(X_train)
-        y_true = y_train
-        _ = self.logger.log_metrics(y_true,y_pred,'train')
-
-        y_pred = self.model.predict(X_eval)
-        y_true = y_eval
-        _ = self.logger.log_metrics(y_true,y_pred,'eval')
-
-
-    def test(self) -> dict:
-        phase='test'
-        dataset_test = get_dataset(self.cfg,phase=phase, eval_rate=self.cfg.data.eval_rate)
-        X_test, y_test = self._dataset2np(dataset_test)
-
-        y_pred = self.model.predict(X_test)
-        y_true = y_test
-        metrics_dict = self.logger.log_metrics(y_true,y_pred,phase)
-
-    def _dataset2np(self,dataset):
-        data_s = []
-        label_s = []
-        for i in range(dataset.__len__()):
-            data,label = dataset.__getitem__(i)
-            data_s.append(data)
-            label_s.append(label)
-        return np.array(data_s) , np.array(label_s)
-
-trainer_dct = {
-    "DLTrainer":DLTrainer,
-    "MLTrainer":MLTrainer
-}
-
-def get_trainer(cfg, logger):
-    if cfg.train.name in trainer_dct.keys():
-        trainer = trainer_dct[cfg.train.name](cfg, logger)
-    else:
-        raise Exception(f'{cfg.train.name} in not implemented')
+# def get_trainer(cfg, logger):
+#     if cfg.train.name in trainer_dct.keys():
+#         trainer = trainer_dct[cfg.train.name](cfg, logger)
+#     else:
+#         raise Exception(f'{cfg.train.name} in not implemented')
     
-    return trainer
+#     return trainer

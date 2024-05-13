@@ -24,7 +24,7 @@ class TimmClassifier(nn.Module):
         features = self.backbone(x)
         y = self.head(features)
 
-        return y, features
+        return y
 
 class TestNet(nn.Module):
     def __init__(self):
@@ -219,15 +219,18 @@ class UNet(nn.Module):
         x = torch.sigmoid(x)
         return x
 
-def get_model(model_cfg:model_cfg):
+def get_model(model_cfg:model_cfg,task):
 
     if model_cfg.name in timm.list_models()+timm.list_models(pretrained=True):
-        model = TimmClassifier(
-            model_name = model_cfg.name,
-            out_dim = model_cfg.out_dim,
-            pre_train = model_cfg.pre_train,
-            in_chans = model_cfg.in_chans
-            )
+        if task == "classification":
+            model = TimmClassifier(
+                model_name = model_cfg.name,
+                out_dim = model_cfg.out_dim,
+                pre_train = model_cfg.pre_train,
+                in_chans = model_cfg.in_chans
+                )
+        elif task == "regression":
+            pass
 
     else:
         raise Exception(f'{model_cfg.name} in not implemented')
