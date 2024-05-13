@@ -2,14 +2,23 @@ from dllib.config import *
 import mlflow
 
 class Logger():
-    def __init__(self, logger_cfg:logger_cfg) -> None:
 
-        mlflow.set_experiment(experiment_name=logger_cfg.experiment_name)
+    def __init__(
+            self, 
+            logger_cfg:logger_cfg=logger_cfg()
+            ) -> None:
+
+        import warnings
+
+        warnings.simplefilter('ignore', DeprecationWarning)
+        warnings.simplefilter('ignore', UserWarning)
+
+
         mlflow.set_tracking_uri(logger_cfg.log_uri)
+        mlflow.set_experiment(experiment_name=logger_cfg.experiment_name)
 
         with mlflow.start_run(run_name=logger_cfg.run_name) as run:
             self.run_id = run.info.run_id
-
 
     def log_metrics(self,metrics):
         with mlflow.start_run(run_id=self.run_id):
@@ -24,8 +33,8 @@ class Logger():
             mlflow.log_artifacts(local_dir=file_path)
 
     def log_model(self, model,model_name):
-
-        mlflow.pytorch.log_model(model, model_name)
+        with mlflow.start_run(run_id=self.run_id):
+            mlflow.pytorch.log_model(model, model_name)
 
 
 

@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import DTD,Country211,MNIST
 from torchvision import transforms
 
+import torch.nn.functional as F
 from torch.utils.data import random_split
 from PIL import Image
 from glob import glob
@@ -41,6 +42,7 @@ class MNIST_(Dataset):
                 ) -> None:
 
         img_size = others["img_size"]
+        self.class_num = others["class_num"]
             
         self.dataset = MNIST(
             root=root_dir,
@@ -60,7 +62,9 @@ class MNIST_(Dataset):
         return self.dataset.__len__()
 
     def __getitem__(self, index):
-        return self.dataset.__getitem__(index)
+        img,label= self.dataset.__getitem__(index)
+        label = F.one_hot(torch.tensor(label),num_classes=self.class_num)
+        return img, label
 
 
 custom_dataset_dict = {

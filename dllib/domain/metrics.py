@@ -2,7 +2,6 @@ from sklearn.metrics import classification_report, accuracy_score, f1_score
 import numpy as np
 from  torch import nn
 
-
 def get_metrics(task):
 
     if task == "classification":
@@ -88,4 +87,4 @@ def classification_metrics(y_pred, y_true):
 
     metrics_dict = summary_report(metrics_dict)
 
-    return metrics_dict
+    return metrics_dict["accuracy"]
