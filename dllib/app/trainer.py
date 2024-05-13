@@ -112,14 +112,3 @@ class Trainer(object):
         dl_test = get_dataloader(dataset_test, self.cfg.model, 'test')
         metrics, loss = self._update( dl_test, 'test')
 
-# trainer_dct = {
-#     "Trainer":Trainer
-# }
-
-# def get_trainer(cfg, logger):
-#     if cfg.train.name in trainer_dct.keys():
-#         trainer = trainer_dct[cfg.train.name](cfg, logger)
-#     else:
-#         raise Exception(f'{cfg.train.name} in not implemented')
-    
-#     return trainer

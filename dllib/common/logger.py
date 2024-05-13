@@ -14,13 +14,17 @@ class Logger():
         with mlflow.start_run(run_name=logger_cfg.run_name) as run:
             self.run_id = run.info.run_id
 
-    def log_metrics(self,metrics,step):
+    def log_metrics(self,metrics:dict,step:int):
         with mlflow.start_run(run_id=self.run_id):
             mlflow.log_metrics(metrics=metrics,step=step)
 
-    def log_params(self,params):
+    def log_params(self,params:dict):
         with mlflow.start_run(run_id=self.run_id):
             mlflow.log_params(params=params)
+
+    # def log_config(self,config):
+    #     with mlflow.start_run(run_id=self.run_id):
+    #         mlflow.log_params(params=params)
 
     def log_artifacts(self,file_path):
         with mlflow.start_run(run_id=self.run_id):

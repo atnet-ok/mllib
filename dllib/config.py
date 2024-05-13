@@ -13,7 +13,7 @@ class model_cfg:
 class dataset_cfg:
     name:str="MNIST"
     eval_rate:float= 0.2
-    root_dir:str="/mnt/d/data/"
+    root_dir:str="/mnt/data/"
     others = {
         "img_size":224,
         "class_num":10
@@ -38,7 +38,7 @@ class optimizer_cfg:
 @dataclass
 class trainer_cfg:
     seed:int=42
-    epoch:int=10
+    epoch:int=5
     device:str="cuda:0"
     amp:bool=True
     task:str = "classification"
@@ -50,7 +50,7 @@ class trainer_cfg:
 
 @dataclass
 class logger_cfg:
-    log_uri:str="./.log/"
+    log_uri:str="/mnt/data/log/"
     experiment_name:str="test_expr"
     run_name:str="test_run"
 
