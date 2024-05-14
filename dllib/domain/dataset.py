@@ -16,37 +16,6 @@ import os
 import torchaudio
 from dllib.config import dataset_cfg,dataloader_cfg
 
-
-mel_spec_params = {
-    "sample_rate": 32000,
-    "n_mels": 128,
-    "f_min": 20,
-    "f_max": 16000,
-    "n_fft": 2048,
-    "hop_length": 512,
-    "normalized": True,
-    "center" : True,
-    "pad_mode" : "constant",
-    "norm" : "slaney",
-    "onesided" : True,
-    "mel_scale" : "slaney"
-}
-top_db = 80
-train_period = 5
-val_period = 5
-N_FOLD = 5
-
-image_size = 256
-
-use_amp = True
-max_grad_norm = 10
-early_stopping = 7
-
-secondary_coef = 1.0
-
-train_duration = train_period * mel_spec_params["sample_rate"]
-val_duration = val_period * mel_spec_params["sample_rate"]
-
 class Birdclef2024Dataset(Dataset):
     def __init__(
             self, 
@@ -58,12 +27,38 @@ class Birdclef2024Dataset(Dataset):
                 ) -> None:
         
         seed = others["seed"]
+        mel_spec_params = {
+            "sample_rate": 32000,
+            "n_mels": 128,
+            "f_min": 20,
+            "f_max": 16000,
+            "n_fft": 2048,
+            "hop_length": 512,
+            "normalized": True,
+            "center" : True,
+            "pad_mode" : "constant",
+            "norm" : "slaney",
+            "onesided" : True,
+            "mel_scale" : "slaney"
+        }
+
         fold = N_FOLD%seed
 
-        transform = self.get_transform(phase=phase)
+        image_size = 256
+        top_db = 80
+        train_period = 5
+        val_period = 5
+        N_FOLD = 5
+        secondary_coef = 1.0
+
+        self.sample_rate = mel_spec_params["sample_rate"]
+        self.train_duration = train_period * mel_spec_params["sample_rate"]
+        self.val_duration = val_period * mel_spec_params["sample_rate"]
+
+        transform = self.get_transform(phase=phase,image_size=image_size)
         
         df = pd.read_csv(os.path.join(root_dir,'/birdclef-2024/train_metadata.csv'))
-        df["path"] = "../data/birdclef-2024/train_audio/" + df["filename"]
+        df["path"] = pd.read_csv(os.path.join(root_dir,"/birdclef-2024/train_audio/" + df["filename"]))
         df["rating"] = np.clip(df["rating"] / df["rating"].max(), 0.1, 1.0)
 
         skf = StratifiedKFold(n_splits=N_FOLD, random_state=seed, shuffle=True)
@@ -92,7 +87,7 @@ class Birdclef2024Dataset(Dataset):
     def __len__(self):
         return len(self.df)
 
-    def get_transform(self,phase):
+    def get_transform(self,phase,image_size):
         transforms_train = A.Compose([
             A.HorizontalFlip(p=0.5),
             A.Resize(image_size, image_size),
@@ -121,8 +116,8 @@ class Birdclef2024Dataset(Dataset):
         return target
 
     def prepare_spec(self, path):
-        wav = read_wav(path)
-        wav = crop_start_wav(wav, train_duration)
+        wav = read_wav(path,self.sample_rate)
+        wav = crop_start_wav(wav, self.train_duration)
         mel_spectrogram = normalize_melspec(self.db_transform(self.mel_transform(wav)))
         mel_spectrogram = mel_spectrogram * 255
         mel_spectrogram = mel_spectrogram.expand(3, -1, -1).permute(1, 2, 0).numpy()
@@ -172,9 +167,9 @@ def normalize_melspec(X, eps=1e-6):
         V[fix_ind] = V_fix
     return V
 
-def read_wav(path):
+def read_wav(path,sample_rate):
     wav, org_sr = torchaudio.load(path, normalize=True)
-    wav = torchaudio.functional.resample(wav, orig_freq=org_sr, new_freq=mel_spec_params["sample_rate"])
+    wav = torchaudio.functional.resample(wav, orig_freq=org_sr, new_freq=sample_rate)
     return wav
 
 
