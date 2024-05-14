@@ -2,6 +2,7 @@ from torch import nn
 import torch.nn.functional as F
 import timm
 import torch
+import numpy as np
 
 from dllib.config import model_cfg
 
@@ -218,6 +219,50 @@ class UNet(nn.Module):
         x = self.outc(x)
         x = torch.sigmoid(x)
         return x
+
+
+class GeM(torch.nn.Module):
+    def __init__(self, p=3, eps=1e-6):
+        super(GeM, self).__init__()
+        self.p = torch.nn.Parameter(torch.ones(1) * p)
+        self.eps = eps
+
+    def forward(self, x):
+        bs, ch, h, w = x.shape
+        x = torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(
+            1.0 / self.p)
+        x = x.view(bs, ch)
+        return x
+
+
+class CNN(torch.nn.Module):
+    def __init__(self, backbone, pretrained):
+        super().__init__()
+
+        out_indices = (3, 4)
+        self.backbone = timm.create_model(
+            backbone,
+            features_only=True,
+            pretrained=pretrained,
+            in_chans=3,
+            num_classes=num_classes,
+            out_indices=out_indices,
+        )
+        feature_dims = self.backbone.feature_info.channels()
+        print(f"feature dims: {feature_dims}")
+
+        self.global_pools = torch.nn.ModuleList([GeM() for _ in out_indices])
+        self.mid_features = np.sum(feature_dims)
+        self.neck = torch.nn.BatchNorm1d(self.mid_features)
+        self.head = torch.nn.Linear(self.mid_features, num_classes)
+
+    def forward(self, x):
+        ms = self.backbone(x)
+        h = torch.cat([global_pool(m) for m, global_pool in zip(ms, self.global_pools)], dim=1)
+        x = self.neck(h)
+        x = self.head(x)
+        return x
+
 
 def get_model(model_cfg:model_cfg,task):
 

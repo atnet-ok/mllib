@@ -3,7 +3,8 @@ from dllib.common.utils import *
 
 @dataclass
 class model_cfg:
-    name: str="resnet18"
+    name: str = ""
+    backbone: str="eca_nfnet_l0"
     pre_train:bool =True
     in_chans:int=1
     out_dim:int=10

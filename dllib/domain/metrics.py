@@ -1,16 +1,18 @@
 from sklearn.metrics import classification_report, accuracy_score, f1_score
 import numpy as np
+import torch
 from  torch import nn
 
 def get_metrics(task):
 
     if task == "classification":
-        criterion = nn.CrossEntropyLoss()
+        criterion = FocalLossBCE()
         score = "accuracy"
         best_score = 0
         score_direction = 1
         metrics =  classification_metrics
     
+
     elif task == "generation":
         criterion = nn.MSELoss()
         score = "MSE"
@@ -30,7 +32,7 @@ def get_metrics(task):
         score = "IoU"
         best_score = 0
         score_direction = 1
-        metrics = semaseg_metrics
+        metrics = semaseg_metrics    
 
     return metrics, criterion
 
@@ -88,3 +90,33 @@ def classification_metrics(y_pred, y_true):
     metrics_dict = summary_report(metrics_dict)
 
     return metrics_dict["accuracy"]
+
+class FocalLossBCE(torch.nn.Module):
+    def __init__(
+            self,
+            alpha: float = 0.25,
+            gamma: float = 2,
+            reduction: str = "mean",
+            bce_weight: float = 1.0,
+            focal_weight: float = 1.0,
+    ):
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+        self.bce = torch.nn.BCEWithLogitsLoss(reduction=reduction)
+        self.bce_weight = bce_weight
+        self.focal_weight = focal_weight
+
+    def forward(self, logits, targets):
+        focall_loss = torchvision.ops.focal_loss.sigmoid_focal_loss(
+            inputs=logits,
+            targets=targets,
+            alpha=self.alpha,
+            gamma=self.gamma,
+            reduction=self.reduction,
+        )
+        bce_loss = self.bce(logits, targets)
+        return self.bce_weight * bce_loss + self.focal_weight * focall_loss
+
+
