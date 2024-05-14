@@ -54,14 +54,3 @@ class logger_cfg:
     experiment_name:str="test_expr"
     run_name:str="test_run"
 
-# def get_config(config_path):
-
-#     dct = yaml2dct(config_path)
-#     cfg = config.from_dict(dct)
-#     return cfg
-
-# def save_config(cfg:config, config_id:str=date2str(),save_dir='config/'):
-#     dct = asdict(cfg)
-#     save_path = os.path.join(save_dir, f"{config_id}.yaml")
-#     dct2yaml(dct, save_path)
-#     return save_path
