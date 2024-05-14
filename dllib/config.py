@@ -13,7 +13,7 @@ class model_cfg:
 class dataset_cfg:
     name:str="MNIST"
     eval_rate:float= 0.2
-    root_dir:str="/mnt/data/"
+    root_dir:str="/mnt/d/data/"
     others = {
         "img_size":224,
         "class_num":10
@@ -50,7 +50,7 @@ class trainer_cfg:
 
 @dataclass
 class logger_cfg:
-    log_uri:str="/mnt/data/log/"
+    log_uri:str="/mnt/d/log/"
     experiment_name:str="test_expr"
     run_name:str="test_run"
 
