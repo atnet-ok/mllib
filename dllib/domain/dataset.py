@@ -42,8 +42,6 @@ class Birdclef2024Dataset(Dataset):
             "mel_scale" : "slaney"
         }
 
-        fold = N_FOLD%seed
-
         image_size = 256
         top_db = 80
         train_period = 5
@@ -51,14 +49,18 @@ class Birdclef2024Dataset(Dataset):
         N_FOLD = 5
         secondary_coef = 1.0
 
+        fold = N_FOLD%seed
+
         self.sample_rate = mel_spec_params["sample_rate"]
         self.train_duration = train_period * mel_spec_params["sample_rate"]
         self.val_duration = val_period * mel_spec_params["sample_rate"]
 
         transform = self.get_transform(phase=phase,image_size=image_size)
+
+        print(os.path.join(root_dir,'birdclef-2024/train_metadata.csv'))
         
-        df = pd.read_csv(os.path.join(root_dir,'/birdclef-2024/train_metadata.csv'))
-        df["path"] = pd.read_csv(os.path.join(root_dir,"/birdclef-2024/train_audio/" + df["filename"]))
+        df = pd.read_csv(os.path.join(root_dir,'birdclef-2024/train_metadata.csv'))
+        df["path"] = os.path.join(root_dir,"birdclef-2024/train_audio/") + df["filename"]
         df["rating"] = np.clip(df["rating"] / df["rating"].max(), 0.1, 1.0)
 
         skf = StratifiedKFold(n_splits=N_FOLD, random_state=seed, shuffle=True)
@@ -66,7 +68,7 @@ class Birdclef2024Dataset(Dataset):
         for ifold, (train_idx, val_idx) in enumerate(skf.split(X=df, y=df["primary_label"].values)):
             df.loc[val_idx, 'fold'] = ifold
 
-        sub = pd.read_csv(os.path.join(root_dir,"/birdclef-2024/sample_submission.csv"))
+        sub = pd.read_csv(os.path.join(root_dir,"birdclef-2024/sample_submission.csv"))
         target_columns = sub.columns.tolist()[1:]
         num_classes = len(target_columns)
         bird2id = {b: i for i, b in enumerate(target_columns)}

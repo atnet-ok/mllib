@@ -6,18 +6,18 @@ class model_cfg:
     name: str = ""
     backbone: str="eca_nfnet_l0"
     pre_train:bool =True
-    in_chans:int=1
-    out_dim:int=10
+    in_chans:int=3
+    out_dim:int=182
     others = None
 
 @dataclass
 class dataset_cfg:
-    name:str="MNIST"
+    name:str="Birdclef2024"
     eval_rate:float= 0.2
     root_dir:str="/mnt/d/data/"
     others = {
         "img_size":224,
-        "class_num":10
+        "seed":3
         }
 
 @dataclass

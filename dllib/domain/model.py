@@ -236,7 +236,7 @@ class GeM(torch.nn.Module):
 
 
 class CNN(torch.nn.Module):
-    def __init__(self, backbone, pretrained):
+    def __init__(self, backbone, pretrained, num_classes):
         super().__init__()
 
         out_indices = (3, 4)
@@ -266,18 +266,10 @@ class CNN(torch.nn.Module):
 
 def get_model(model_cfg:model_cfg,task):
 
-    if model_cfg.name in timm.list_models()+timm.list_models(pretrained=True):
-        if task == "classification":
-            model = TimmClassifier(
-                model_name = model_cfg.name,
-                out_dim = model_cfg.out_dim,
-                pre_train = model_cfg.pre_train,
-                in_chans = model_cfg.in_chans
-                )
-        elif task == "regression":
-            pass
-
-    else:
-        raise Exception(f'{model_cfg.name} in not implemented')
+    model = CNN(
+        backbone=model_cfg.backbone, 
+        pretrained=model_cfg.pre_train,
+        num_classes=model_cfg.out_dim
+        )
     
     return model

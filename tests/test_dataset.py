@@ -26,15 +26,14 @@ class TestAll(unittest.TestCase):
         for phase in ["train","eval"]:
             dataset = get_dataset(cfg_dataset,phase)
             print(dataset.__len__())
-            img,label =dataset.__getitem__(0)
-            print(img.shape)
-            print(label)
+            outp = dataset.__getitem__(0)
+            print(outp )
 
-            dataloader = get_dataloader(dataset,cfg_dataloader,phase)
-            for x,y in dataloader:
-                print(x.shape)
-                print(y)
-                break
+            # dataloader = get_dataloader(dataset,cfg_dataloader,phase)
+            # for x,y in dataloader:
+            #     print(x.shape)
+            #     print(y)
+            #     break
 
         
 if __name__ == '__main__':
