@@ -52,7 +52,7 @@ class trainer_cfg:
 
 @dataclass
 class logger_cfg:
-    log_uri:str="/mnt/d/log/"
+    log_uri:str="/mnt/d/log/mlruns"
     experiment_name:str="test_expr"
     run_name:str="test_run"
 
