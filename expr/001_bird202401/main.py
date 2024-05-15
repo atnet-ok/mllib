@@ -26,9 +26,9 @@ def main(cfg:config) -> None:
     cfg.logger.run_name = date2str()
 
     print(OmegaConf.to_yaml(cfg))
-
-
     logger = Logger(logger_cfg=cfg.logger)
+    logger.log_config(OmegaConf.to_container(cfg.trainer))
+
     trainer = MixupTrainer(trainer_cfg=cfg.trainer,logger=logger)
     trainer.train()
 
