@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 from dllib.config import trainer_cfg,logger_cfg
 from dllib.app.trainer import MixupTrainer
+from dllib.common.logger import Logger
 from dllib.common.utils import date2str
 
 @dataclass
@@ -26,9 +27,9 @@ def main(cfg:config) -> None:
 
     print(OmegaConf.to_yaml(cfg))
 
-    cfg_trainer = trainer_cfg()
 
-    trainer = MixupTrainer(cfg_trainer)
+    logger = Logger(logger_cfg=cfg.logger)
+    trainer = MixupTrainer(trainer_cfg=cfg.trainer,logger=logger)
     trainer.train()
 
 if __name__ == "__main__":

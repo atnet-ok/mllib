@@ -28,8 +28,8 @@ trainer:
   dataloader:
     batch_size_train: 128
     batch_size_eval: 128
-    num_workers: 4
+    num_workers: 8
 logger:
-  log_uri: /mnt/d/log/
+  log_uri: /mnt/d/log/mlruns
   experiment_name: test_expr
   run_name: test_run

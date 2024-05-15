@@ -24,7 +24,6 @@ class Birdclef2024Dataset(Dataset):
             eval_rate:float,
             img_size,
             seed,
-            others:dict,
             add_secondary_labels=True
                 ) -> None:
         
@@ -241,7 +240,6 @@ def get_dataset(dataset_cfg:dataset_cfg,phase:str):
                 eval_rate=dataset_cfg.eval_rate,
                 seed=dataset_cfg.seed,
                 img_size=dataset_cfg.img_size,
-                others=dataset_cfg.others
                 )
         return dataset
     
