@@ -26,7 +26,7 @@ class TestAll(unittest.TestCase):
         model = get_model(
             cfg_model
         )
-        x = torch.rand(32,1,100,100)
+        x = torch.rand(32,3,224,224)
         y = model(x)
         print(y.shape)
 

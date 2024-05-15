@@ -264,7 +264,7 @@ class CNN(torch.nn.Module):
         return x
 
 
-def get_model(model_cfg:model_cfg,task):
+def get_model(model_cfg:model_cfg):
 
     model = CNN(
         backbone=model_cfg.backbone, 
