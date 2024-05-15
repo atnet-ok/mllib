@@ -77,8 +77,12 @@ class Birdclef2024Dataset(Dataset):
         num_classes = len(target_columns)
         bird2id = {b: i for i, b in enumerate(target_columns)}
 
-        trn_df = df[df['fold'] != fold].reset_index(drop=True)
-        val_df = df[df['fold'] == fold].reset_index(drop=True)
+        if seed >= 0:
+            trn_df = df[df['fold'] != fold].reset_index(drop=True)
+            val_df = df[df['fold'] == fold].reset_index(drop=True)
+        else:
+            trn_df = df.reset_index(drop=True)
+            val_df = df[df['fold'] == fold].reset_index(drop=True)
 
         self.df  = trn_df if phase == "train" else val_df
         
@@ -89,6 +93,7 @@ class Birdclef2024Dataset(Dataset):
         self.mel_transform = torchaudio.transforms.MelSpectrogram(**mel_spec_params)
         self.db_transform = torchaudio.transforms.AmplitudeToDB(stype='power', top_db=top_db)
         self.transform = transform
+        self.target_columns = target_columns
 
     def __len__(self):
         return len(self.df)

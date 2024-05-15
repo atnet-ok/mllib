@@ -41,6 +41,12 @@ class Trainer(object):
         #self.model = torch.compile(self.model) #for pytorch 2.0
 
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
+
+    def _load_data(self):
+        self.dataset_train = get_dataset(self.cfg.dataset,phase='train')
+        self.dataset_eval = get_dataset(self.cfg.dataset,phase='eval')
+        self.dataloader_train = get_dataloader(self.dataset_train,self.cfg.dataloader, 'train')
+        self.dataloader_eval = get_dataloader(self.dataset_eval,self.cfg.dataloader, 'eval')
         
     def _update(self, dataloader:DataLoader ,phase:str='train', epoch:int =None) -> dict:
 
@@ -84,11 +90,8 @@ class Trainer(object):
 
     def train(self):
 
-        dataset_train = get_dataset(self.cfg.dataset,phase='train')
-        dataset_eval = get_dataset(self.cfg.dataset,phase='eval')
-        dataloader_train = get_dataloader(dataset_train,self.cfg.dataloader, 'train')
-        dataloader_eval = get_dataloader(dataset_eval,self.cfg.dataloader, 'eval')
-        dl_dct = {"train":dataloader_train,"eval":dataloader_eval}
+        self._load_data()
+        dl_dct = {"train":self.dataloader_train,"eval":self.dataloader_eval}
 
         for epoch in range(self.epoch):
             print(f"--------------------------------------")
@@ -168,7 +171,6 @@ class MixupTrainer(Trainer):
             loss += loss_t.item()
             y_true.extend(list(target.detach().cpu().numpy()))
             y_pred.extend(list(y.detach().cpu().numpy()))
-
 
         loss = loss/num_batches
         metrics = self.get_metrics(y_pred, y_true)

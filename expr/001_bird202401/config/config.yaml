@@ -1,6 +1,6 @@
 trainer:
   seed: 42
-  epoch: 100
+  epoch: 30
   device: cuda:0
   amp: true
   task: classification
@@ -10,7 +10,9 @@ trainer:
     wd: 1.0e-06
     momentum: 0.9
     scheduler: cosine_warmup
-    sche_cycle: 100
+    sche_cycle: 30
+    warmup_t: 4
+    warmup_lr_init_rate: 0.1
   dataset:
     name: Birdclef2024
     eval_rate: 0.2

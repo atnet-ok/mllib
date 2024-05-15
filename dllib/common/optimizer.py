@@ -52,14 +52,16 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model):
 
     sche = optimizer_cfg.scheduler
     sche_cycle =optimizer_cfg.sche_cycle
+    warmup_t=optimizer_cfg.warmup_t
+    warmup_lr_init_rate=optimizer_cfg.warmup_lr_init_rate
 
     if sche=='cosine_warmup':
         scheduler = CosineLRScheduler(
                 optimizer, 
                 t_initial=sche_cycle , 
-                lr_min=lr*1e-1, 
-                warmup_t=int(sche_cycle/10), 
-                warmup_lr_init=lr*1e-1, 
+                lr_min=lr*warmup_lr_init_rate, 
+                warmup_t=warmup_t, 
+                warmup_lr_init=lr*warmup_lr_init_rate, 
                 warmup_prefix=True
                 )
         

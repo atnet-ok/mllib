@@ -29,6 +29,9 @@ class TestAll(unittest.TestCase):
             output_ = dataset.__getitem__(0)
             print(output_  )
 
+            print(dataset.target_columns)
+            print(dataset.bird2id)
+
             # dataloader = get_dataloader(dataset,cfg_dataloader,phase)
             # for x,y in dataloader:
             #     print(x.shape)
