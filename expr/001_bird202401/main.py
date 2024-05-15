@@ -22,7 +22,6 @@ class config:
 @hydra.main(config_name="config", version_base=None, config_path="config")
 def main(cfg:config) -> None:
 
-    cfg.logger.experiment_name = "birdclef2024"
     cfg.logger.run_name = date2str()
 
     print(OmegaConf.to_yaml(cfg))
