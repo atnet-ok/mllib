@@ -23,7 +23,7 @@ class dataset_cfg:
 class dataloader_cfg:
     batch_size_train:int = 128
     batch_size_eval:int = 128
-    num_workers:int=4
+    num_workers:int=8
 
 @dataclass
 class optimizer_cfg:
