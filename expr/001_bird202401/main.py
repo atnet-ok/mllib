@@ -14,16 +14,20 @@ from dllib.common.utils import date2str
 
 @dataclass
 class config:
-    trainer:trainer_cfg
-    logger:logger_cfg
+    trainer:trainer_cfg=trainer_cfg()
+    logger:logger_cfg=logger_cfg()
 
 @hydra.main(config_name="config", version_base=None, config_path="config")
 def main(cfg:config) -> None:
-    print(OmegaConf.to_yaml(cfg))
 
     cfg.logger.experiment_name = "birdclef2024"
     cfg.logger.run_name = date2str()
 
+    print(OmegaConf.to_yaml(cfg))
 
 if __name__ == "__main__":
+
+    cfg = config()
+    # cfg = OmegaConf.to_yaml(cfg)
+    OmegaConf.save(cfg, 'config/config.yaml')
     main()
