@@ -169,6 +169,7 @@ class MixupTrainer(Trainer):
             y_true.extend(list(target.detach().cpu().numpy()))
             y_pred.extend(list(y.detach().cpu().numpy()))
 
+
         loss = loss/num_batches
         metrics = self.get_metrics(y_pred, y_true)
 

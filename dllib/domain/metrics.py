@@ -11,7 +11,7 @@ def get_metrics(task):
         score = "accuracy"
         best_score = 0
         score_direction = 1
-        metrics =  birdclef2024score
+        metrics = classification_metrics #birdclef2024score
     
 
     elif task == "generation":
@@ -94,7 +94,7 @@ def classification_metrics(y_pred, y_true):
 
 def birdclef2024score(y_pred, y_true):
 
-    return roc_auc_score(y_true,y_pred,average="macro")
+    return roc_auc_score(y_true,y_pred,average="macro",multi_class="ovr")
 
 class FocalLossBCE(torch.nn.Module):
     def __init__(
