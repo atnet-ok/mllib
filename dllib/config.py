@@ -16,7 +16,7 @@ class dataset_cfg:
     eval_rate:float= 0.2
     root_dir:str="/mnt/d/data/"
     others = {
-        "img_size":224,
+        "img_size":256,
         "seed":3
         }
 
@@ -29,17 +29,17 @@ class dataloader_cfg:
 @dataclass
 class optimizer_cfg:
     name:str="adam"
-    lr:float=0.0004
-    wd:float=0.0001
+    lr:float=4e-4
+    wd:float=1e-6
     momentum:float=0.9
     scheduler:str="cosine_warmup"
-    sche_cycle:int=40
+    sche_cycle:int=100
     others = None
 
 @dataclass
 class trainer_cfg:
     seed:int=42
-    epoch:int=5
+    epoch:int=100
     device:str="cuda:0"
     amp:bool=True
     task:str = "classification"

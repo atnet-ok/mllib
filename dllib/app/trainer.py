@@ -1,4 +1,5 @@
 ### for training class
+from dllib.config import trainer_cfg
 from dllib.domain.dataset import get_dataset,get_dataloader
 from dllib.domain.model import get_model
 from dllib.common.optimizer import get_optimizer
@@ -22,7 +23,7 @@ class Trainer(object):
         self.logger = logger
         self.task = self.cfg.task
 
-        self.model = get_model(self.cfg.model, self.task)
+        self.model = get_model(self.cfg.model)
         self.get_metrics, self.criterion = get_metrics(self.task)
         self.best_loss = 1000
 
@@ -112,3 +113,63 @@ class Trainer(object):
         dl_test = get_dataloader(dataset_test, self.cfg.model, 'test')
         metrics, loss = self._update( dl_test, 'test')
 
+def mixup(data, targets, alpha):
+    indices = torch.randperm(data.size(0))
+    data2 = data[indices]
+    targets2 = targets[indices]
+
+    lam = torch.FloatTensor([np.random.beta(alpha, alpha)])
+    data = data * lam + data2 * (1 - lam)
+    targets = targets * lam + targets2 * (1 - lam)
+
+    return data, targets
+
+class MixupTrainer(Trainer):
+
+    def __init__(self, trainer_cfg: trainer_cfg = trainer_cfg(), logger: Logger = Logger()) -> None:
+        super().__init__(trainer_cfg, logger)
+
+    def _update(self, dataloader:DataLoader ,phase:str='train', epoch:int =None) -> dict:
+
+        if phase == 'train':
+            self.model.train()
+        else:
+            self.model.eval()
+
+        loss = 0
+        y_true = []
+        y_pred = []
+
+        num_batches = len(dataloader)
+
+        for data in tqdm(dataloader):
+
+            spec = data['spec']
+            target = data['target']
+            spec, target = mixup(spec, target, 0.5)
+
+            self.optimizer.zero_grad()
+            spec=spec.to(torch.float32).to(self.device)
+            target=target.to(torch.float32).to(self.device)
+
+            with torch.set_grad_enabled(phase == 'train'):
+                with torch.cuda.amp.autocast(
+                    enabled=(self.amp and (phase == 'train'))
+                    ):
+                    y = self.model(spec)
+                    loss_t = self.criterion(y,target)
+
+            if phase == 'train':
+                self.scaler.scale(loss_t).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+                self.scheduler.step(epoch+1)
+
+            loss += loss_t.item()
+            y_true.extend(list(target.detach().cpu().numpy()))
+            y_pred.extend(list(y.detach().cpu().numpy()))
+
+        loss = loss/num_batches
+        metrics = self.get_metrics(y_pred, y_true)
+
+        return metrics, loss

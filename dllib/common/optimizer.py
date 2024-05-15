@@ -58,7 +58,7 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model):
                 optimizer, 
                 t_initial=sche_cycle , 
                 lr_min=lr*1e-1, 
-                warmup_t=int(sche_cycle/5), 
+                warmup_t=int(sche_cycle/10), 
                 warmup_lr_init=lr*1e-1, 
                 warmup_prefix=True
                 )

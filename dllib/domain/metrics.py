@@ -2,6 +2,7 @@ from sklearn.metrics import classification_report, accuracy_score, f1_score
 import numpy as np
 import torch
 from  torch import nn
+import torchvision
 
 def get_metrics(task):
 

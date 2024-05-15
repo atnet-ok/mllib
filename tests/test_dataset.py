@@ -26,8 +26,8 @@ class TestAll(unittest.TestCase):
         for phase in ["train","eval"]:
             dataset = get_dataset(cfg_dataset,phase)
             print(dataset.__len__())
-            outp = dataset.__getitem__(0)
-            print(outp )
+            output_ = dataset.__getitem__(0)
+            print(output_  )
 
             # dataloader = get_dataloader(dataset,cfg_dataloader,phase)
             # for x,y in dataloader:

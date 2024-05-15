@@ -7,3 +7,4 @@ expr/
 !expr/000_example/main.py
 
 .log/
+.tmp/

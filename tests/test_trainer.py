@@ -1,6 +1,6 @@
 import unittest
 from dllib.config import trainer_cfg
-from dllib.app.trainer import Trainer
+from dllib.app.trainer import MixupTrainer
 
 # python -m unittest tests.test_trainer
 
@@ -22,7 +22,7 @@ class TestAll(unittest.TestCase):
 
         cfg_trainer = trainer_cfg()
 
-        trainer = Trainer(cfg_trainer)
+        trainer = MixupTrainer(cfg_trainer)
         trainer.train()
 
 
