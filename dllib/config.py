@@ -15,10 +15,9 @@ class dataset_cfg:
     name:str="Birdclef2024"
     eval_rate:float= 0.2
     root_dir:str="/mnt/d/data/"
-    others = {
-        "img_size":256,
-        "seed":3
-        }
+    img_size:int=256
+    seed:int=0
+    others = None
 
 @dataclass
 class dataloader_cfg:

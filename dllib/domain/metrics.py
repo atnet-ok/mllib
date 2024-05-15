@@ -1,4 +1,4 @@
-from sklearn.metrics import classification_report, accuracy_score, f1_score
+from sklearn.metrics import classification_report, accuracy_score, f1_score,roc_auc_score
 import numpy as np
 import torch
 from  torch import nn
@@ -11,7 +11,7 @@ def get_metrics(task):
         score = "accuracy"
         best_score = 0
         score_direction = 1
-        metrics =  classification_metrics
+        metrics =  birdclef2024score
     
 
     elif task == "generation":
@@ -91,6 +91,10 @@ def classification_metrics(y_pred, y_true):
     metrics_dict = summary_report(metrics_dict)
 
     return metrics_dict["accuracy"]
+
+def birdclef2024score(y_pred, y_true):
+
+    return roc_auc_score(y_true,y_pred,average="macro")
 
 class FocalLossBCE(torch.nn.Module):
     def __init__(

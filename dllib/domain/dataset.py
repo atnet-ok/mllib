@@ -22,11 +22,13 @@ class Birdclef2024Dataset(Dataset):
             root_dir:str,
             phase:str,
             eval_rate:float,
+            img_size,
+            seed,
             others:dict,
             add_secondary_labels=True
                 ) -> None:
         
-        seed = others["seed"]
+        seed = seed
         mel_spec_params = {
             "sample_rate": 32000,
             "n_mels": 128,
@@ -42,14 +44,16 @@ class Birdclef2024Dataset(Dataset):
             "mel_scale" : "slaney"
         }
 
-        image_size = 256
+        image_size = img_size
         top_db = 80
         train_period = 5
         val_period = 5
         N_FOLD = 5
         secondary_coef = 1.0
 
-        fold = N_FOLD%seed
+        fold = seed%N_FOLD
+
+        print(f"fold:{fold}/{N_FOLD}")
 
         self.sample_rate = mel_spec_params["sample_rate"]
         self.train_duration = train_period * mel_spec_params["sample_rate"]
@@ -230,6 +234,8 @@ def get_dataset(dataset_cfg:dataset_cfg,phase:str):
                 root_dir=dataset_cfg.root_dir,
                 phase=phase,
                 eval_rate=dataset_cfg.eval_rate,
+                seed=dataset_cfg.seed,
+                img_size=dataset_cfg.img_size,
                 others=dataset_cfg.others
                 )
         return dataset
