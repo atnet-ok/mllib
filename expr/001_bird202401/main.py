@@ -10,6 +10,7 @@ from omegaconf import OmegaConf
 from dataclasses import dataclass
 
 from dllib.config import trainer_cfg,logger_cfg
+from dllib.app.trainer import MixupTrainer
 from dllib.common.utils import date2str
 
 @dataclass
@@ -25,9 +26,13 @@ def main(cfg:config) -> None:
 
     print(OmegaConf.to_yaml(cfg))
 
+    cfg_trainer = trainer_cfg()
+
+    trainer = MixupTrainer(cfg_trainer)
+    trainer.train()
+
 if __name__ == "__main__":
 
     cfg = config()
-    # cfg = OmegaConf.to_yaml(cfg)
     OmegaConf.save(cfg, 'config/config.yaml')
     main()
