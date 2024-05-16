@@ -4,7 +4,7 @@ from timm.scheduler import CosineLRScheduler
 
 from dllib.config import optimizer_cfg
 
-def get_optimizer(optimizer_cfg:optimizer_cfg,model):
+def get_optimizer(optimizer_cfg:optimizer_cfg,model,epoch_n=40):
     opt = optimizer_cfg.name
     lr = optimizer_cfg.lr
     weight_decay = optimizer_cfg.wd if optimizer_cfg.wd else 0
@@ -51,7 +51,7 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model):
             centered=False)
 
     sche = optimizer_cfg.scheduler
-    sche_cycle =optimizer_cfg.sche_cycle
+    sche_cycle = epoch_n #optimizer_cfg.sche_cycle
     warmup_t=optimizer_cfg.warmup_t
     warmup_lr_init_rate=optimizer_cfg.warmup_lr_init_rate
 

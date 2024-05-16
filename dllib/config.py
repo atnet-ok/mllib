@@ -28,11 +28,11 @@ class dataloader_cfg:
 @dataclass
 class optimizer_cfg:
     name:str="adam"
-    lr:float=4e-4
+    lr:float=1e-4
     wd:float=1e-6
     momentum:float=0.9
     scheduler:str="cosine_warmup"
-    sche_cycle:int=30
+    # sche_cycle:int=30
     warmup_t:int=4
     warmup_lr_init_rate:float=0.1
     others = None
@@ -40,7 +40,7 @@ class optimizer_cfg:
 @dataclass
 class trainer_cfg:
     seed:int=42
-    epoch:int=30
+    epoch:int=40
     device:str="cuda:0"
     amp:bool=True
     task:str = "classification"
@@ -53,6 +53,6 @@ class trainer_cfg:
 @dataclass
 class logger_cfg:
     log_uri:str="/mnt/d/log/birdclef2024/mlruns"
-    experiment_name:str="test_expr"
+    experiment_name:str="0000_test_expr"
     run_name:str="test_run"
 

@@ -1,16 +1,15 @@
 trainer:
   seed: 42
-  epoch: 30
+  epoch: 40
   device: cuda:0
   amp: true
   task: classification
   optimizer:
     name: adam
-    lr: 0.0004
+    lr: 0.0001
     wd: 1.0e-06
     momentum: 0.9
     scheduler: cosine_warmup
-    sche_cycle: 30
     warmup_t: 4
     warmup_lr_init_rate: 0.1
   dataset:
@@ -30,6 +29,6 @@ trainer:
     batch_size_eval: 128
     num_workers: 8
 logger:
-  log_uri: /mnt/d/log/mlruns
-  experiment_name: test_expr
+  log_uri: /mnt/d/log/birdclef2024/mlruns
+  experiment_name: 0000_test_expr
   run_name: test_run

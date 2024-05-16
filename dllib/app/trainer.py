@@ -29,7 +29,8 @@ class Trainer(object):
 
         self.optimizer, self.scheduler, self.model = get_optimizer(
             self.cfg.optimizer, 
-            self.model
+            self.model,
+            self.cfg.epoch
             )
 
         self.epoch = self.cfg.epoch
@@ -167,6 +168,8 @@ class MixupTrainer(Trainer):
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.scheduler.step(epoch+1)
+                lr = self.optimizer.param_groups[0]["lr"]
+                self.logger.log_metrics({"learning_rate":lr},step=epoch)
 
             loss += loss_t.item()
             y_true.extend(list(target.detach().cpu().numpy()))
