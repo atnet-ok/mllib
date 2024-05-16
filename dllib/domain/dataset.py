@@ -27,7 +27,6 @@ class Birdclef2024Dataset(Dataset):
             add_secondary_labels=True
                 ) -> None:
         
-        seed = seed
         mel_spec_params = {
             "sample_rate": 32000,
             "n_mels": 128,
@@ -59,14 +58,12 @@ class Birdclef2024Dataset(Dataset):
         self.val_duration = val_period * mel_spec_params["sample_rate"]
 
         transform = self.get_transform(phase=phase,image_size=image_size)
-
-        print(os.path.join(root_dir,'birdclef-2024/train_metadata.csv'))
         
         df = pd.read_csv(os.path.join(root_dir,'birdclef-2024/train_metadata.csv'))
         df["path"] = os.path.join(root_dir,"birdclef-2024/train_audio/") + df["filename"]
         df["rating"] = np.clip(df["rating"] / df["rating"].max(), 0.1, 1.0)
 
-        skf = StratifiedKFold(n_splits=N_FOLD, random_state=seed, shuffle=True)
+        skf = StratifiedKFold(n_splits=N_FOLD, random_state=0, shuffle=True)
         df['fold'] = -1
         for ifold, (train_idx, val_idx) in enumerate(skf.split(X=df, y=df["primary_label"].values)):
             df.loc[val_idx, 'fold'] = ifold

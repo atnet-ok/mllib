@@ -25,6 +25,14 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model,epoch_n=40):
             eps=1e-08, 
             weight_decay=weight_decay #1e-4
             )
+    elif opt == 'adamW':
+        optimizer = optim.AdamW(
+            model.parameters(), 
+            lr=lr ,
+            betas=(0.9, 0.999), 
+            eps=1e-08, 
+            weight_decay=weight_decay #1e-4
+            )
     elif opt == 'radam':
         optimizer = optim.RAdam(
             model.parameters(), 
@@ -52,7 +60,7 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model,epoch_n=40):
 
     sche = optimizer_cfg.scheduler
     sche_cycle = epoch_n #optimizer_cfg.sche_cycle
-    warmup_t=optimizer_cfg.warmup_t
+    warmup_t_rate=optimizer_cfg.warmup_t_rate
     warmup_lr_init_rate=optimizer_cfg.warmup_lr_init_rate
 
     if sche=='cosine_warmup':
@@ -60,7 +68,7 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model,epoch_n=40):
                 optimizer, 
                 t_initial=sche_cycle , 
                 lr_min=lr*warmup_lr_init_rate, 
-                warmup_t=warmup_t, 
+                warmup_t=round(sche_cycle*warmup_t_rate), 
                 warmup_lr_init=lr*warmup_lr_init_rate, 
                 warmup_prefix=True
                 )

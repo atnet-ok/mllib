@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from dllib.config import trainer_cfg,logger_cfg
 from dllib.app.trainer import MixupTrainer
 from dllib.common.logger import Logger
-from dllib.common.utils import date2str
+from dllib.common.utils import date2str,fix_randomness
 
 @dataclass
 class config:
@@ -22,8 +22,12 @@ class config:
 @hydra.main(config_name="config", version_base=None, config_path="config")
 def main(cfg:config) -> None:
 
-    cfg.logger.run_name = date2str()
 
+    fix_randomness(cfg.trainer.seed)
+
+    cfg.logger.experiment_name = date2str() + "_" + cfg.logger.experiment_name
+
+    cfg.logger.run_name = date2str()
     print(OmegaConf.to_yaml(cfg))
     logger = Logger(logger_cfg=cfg.logger)
     logger.log_config(OmegaConf.to_container(cfg.trainer))

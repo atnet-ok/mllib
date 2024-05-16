@@ -27,23 +27,24 @@ class dataloader_cfg:
 
 @dataclass
 class optimizer_cfg:
-    name:str="adam"
-    lr:float=1e-4
+    name:str="adamW"
+    lr:float=4e-4
     wd:float=1e-6
     momentum:float=0.9
     scheduler:str="cosine_warmup"
     # sche_cycle:int=30
-    warmup_t:int=4
+    warmup_t_rate:float=0.12
     warmup_lr_init_rate:float=0.1
     others = None
 
 @dataclass
 class trainer_cfg:
     seed:int=42
-    epoch:int=40
+    epoch:int=25
     device:str="cuda:0"
     amp:bool=True
     task:str = "classification"
+    mix_up:bool = True
     optimizer:optimizer_cfg=optimizer_cfg()
     dataset:dataset_cfg=dataset_cfg()
     model:model_cfg=model_cfg()

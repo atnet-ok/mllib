@@ -25,7 +25,7 @@ class Trainer(object):
 
         self.model = get_model(self.cfg.model)
         self.get_metrics, self.criterion = get_metrics(self.task)
-        self.best_loss = 1000
+        self.best_score = 1000
 
         self.optimizer, self.scheduler, self.model = get_optimizer(
             self.cfg.optimizer, 
@@ -105,8 +105,8 @@ class Trainer(object):
                 self.logger.log_metrics({f"loss/{phase}":loss},step=epoch)
                 self.logger.log_metrics({f"metrics/{phase}":metrics},step=epoch)
 
-            if self.best_loss > loss:
-                self.best_loss = loss
+            if self.best_score < metrics:
+                self.best_score = metrics
                 self.logger.log_model(model=self.model,model_name="model_best")
                 print("best model ever!")
 
@@ -150,7 +150,8 @@ class MixupTrainer(Trainer):
 
             spec = data['spec']
             target = data['target']
-            spec, target = mixup(spec, target, 0.5)
+            if (phase == "train") and self.cfg.mix_up:
+                spec, target = mixup(spec, target, 0.5)
 
             self.optimizer.zero_grad()
             spec=spec.to(torch.float32).to(self.device)
@@ -176,6 +177,6 @@ class MixupTrainer(Trainer):
             y_pred.extend(list(y.detach().cpu().numpy()))
 
         loss = loss/num_batches
-        metrics = self.get_metrics(y_pred, y_true)
+        metrics = self.get_metrics(y_pred, y_true,phase) 
 
         return metrics, loss
