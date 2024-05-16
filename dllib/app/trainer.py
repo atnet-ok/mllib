@@ -25,7 +25,7 @@ class Trainer(object):
 
         self.model = get_model(self.cfg.model)
         self.get_metrics, self.criterion = get_metrics(self.task)
-        self.best_score = 1000
+        self.best_score = 0
 
         self.optimizer, self.scheduler, self.model = get_optimizer(
             self.cfg.optimizer, 
@@ -105,10 +105,11 @@ class Trainer(object):
                 self.logger.log_metrics({f"loss/{phase}":loss},step=epoch)
                 self.logger.log_metrics({f"metrics/{phase}":metrics},step=epoch)
 
-            if self.best_score < metrics:
+            if metrics>self.best_score:
                 self.best_score = metrics
-                self.logger.log_model(model=self.model,model_name="model_best")
                 print("best model ever!")
+                if epoch > self.epoch/2:
+                    self.logger.log_model(model=self.model,model_name="model_best")
 
         self.logger.log_model(model=self.model,model_name="model_last")
 

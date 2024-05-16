@@ -16,6 +16,9 @@ import os
 import torchaudio
 from dllib.config import dataset_cfg,dataloader_cfg
 
+# https://qiita.com/tomp/items/3bf6d040bbc89a171880
+# https://qiita.com/yujimats/items/2078f98655d93e66af30
+
 class Birdclef2024Dataset(Dataset):
     def __init__(
             self, 
