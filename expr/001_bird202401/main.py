@@ -25,7 +25,7 @@ def main(cfg:config) -> None:
 
     fix_randomness(cfg.trainer.seed)
 
-    cfg.logger.experiment_name = date2str() + "_" + cfg.logger.experiment_name
+    cfg.logger.experiment_name = cfg.logger.experiment_name
 
     cfg.logger.run_name = date2str()
     print(OmegaConf.to_yaml(cfg))

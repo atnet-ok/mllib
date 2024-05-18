@@ -108,8 +108,7 @@ class Trainer(object):
             if metrics>self.best_score:
                 self.best_score = metrics
                 print("best model ever!")
-                if epoch > self.epoch/2:
-                    self.logger.log_model(model=self.model,model_name="model_best")
+                self.logger.log_model(model=self.model,model_name="model_best")
 
         self.logger.log_model(model=self.model,model_name="model_last")
 
