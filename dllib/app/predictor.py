@@ -8,7 +8,7 @@ import numpy as np
 import os
 
 
-def predict(model_url):
+def predict(model_url,cfg_dataset,cfg_dataloader):
     phase = "test"
     device = "cuda:0"
 
@@ -19,10 +19,8 @@ def predict(model_url):
 
     model = torch.load(model_url)
 
-    cfg_dataset=dataset_cfg()
-    dataset = get_dataset(cfg_dataset,phase=phase)
 
-    cfg_dataloader = dataloader_cfg(batch_size_eval=4)
+    dataset = get_dataset(cfg_dataset,phase=phase)
     dataloader = get_dataloader(dataset,cfg_dataloader,phase)
 
     sigmoid = nn.Sigmoid().to(device)
@@ -54,6 +52,8 @@ def predict(model_url):
 
 if __name__=="__main__":
     model_url = "/mnt/d/log/birdclef2024/mlruns/487278736873082663/2d527a266c6c4b66a6045b1c70eb8b8f/artifacts/model_best/data/model.pth"
+    cfg_dataset=dataset_cfg(root_dir="/mnt/d/data")
+    cfg_dataloader = dataloader_cfg(batch_size_eval=4)
 
     df_submission = predict(model_url)
     print(df_submission)
