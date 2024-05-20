@@ -68,7 +68,8 @@ class Birdclef2024Dataset(Dataset):
         df = self.load_dataset(phase,root_dir,fold,seed,N_FOLD=5)
         self.df = df
         
-        sub = pd.read_csv(os.path.join(root_dir,"birdclef-2024/sample_submission.csv"))
+        # sub = pd.read_csv(os.path.join(root_dir,"birdclef-2024/sample_submission.csv"))
+        sub = pd.read_csv('../input/birdclef-2024/sample_submission.csv')
         target_columns = sub.columns.tolist()[1:]
         num_classes = len(target_columns)
         bird2id = {b: i for i, b in enumerate(target_columns)}
@@ -89,8 +90,12 @@ class Birdclef2024Dataset(Dataset):
     
     def load_dataset(self,phase,root_dir,fold,seed,N_FOLD=5):
         if phase=="test":
-            filepath_s = glob(os.path.join(root_dir,'birdclef-2024/test_soundscapes/*.ogg'))
+            #filepath_s = glob(os.path.join(root_dir,'birdclef-2024/test_soundscapes/*.ogg'))
+            filepath_s = glob('../input/birdclef-2024/test_soundscapes/*.ogg')
+            print(filepath_s)
+            
             path_s = [filepath for filepath in filepath_s]
+
             df = pd.DataFrame()
             df["path"] = path_s
             return df
