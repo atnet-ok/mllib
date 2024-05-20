@@ -90,7 +90,7 @@ class Birdclef2024Dataset(Dataset):
     def load_dataset(self,phase,root_dir,fold,seed,N_FOLD=5):
         if phase=="test":
             filepath_s = glob(os.path.join(root_dir,'birdclef-2024/test_soundscapes/*.ogg'))
-            path_s = [os.path.join(root_dir,'birdclef-2024/test_soundscapes/',filepath) for filepath in filepath_s]
+            path_s = [filepath for filepath in filepath_s]
             df = pd.DataFrame()
             df["path"] = path_s
             return df
