@@ -27,7 +27,7 @@ def predict(model_url,cfg_dataset,cfg_dataloader):
 
     for j,img in enumerate(dataloader):
         img = img.to(device)
-        pred = model.predict(img)
+        pred = model(img)
 
         prob_ = sigmoid(pred)
         prob_= prob_.detach().cpu().numpy()
