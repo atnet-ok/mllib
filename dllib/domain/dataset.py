@@ -72,8 +72,10 @@ class Birdclef2024Dataset(Dataset):
         target_columns = sub.columns.tolist()[1:]
         num_classes = len(target_columns)
         bird2id = {b: i for i, b in enumerate(target_columns)}
+        id2bird = {i: b for i, b in enumerate(target_columns)}
 
         self.bird2id = bird2id
+        self.id2bird = id2bird
         self.num_classes = num_classes
         self.secondary_coef = secondary_coef
         self.add_secondary_labels = add_secondary_labels
