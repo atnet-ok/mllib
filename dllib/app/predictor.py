@@ -54,6 +54,6 @@ if __name__=="__main__":
     cfg_dataset=dataset_cfg(root_dir="/mnt/d/data")
     cfg_dataloader = dataloader_cfg(batch_size_eval=4)
 
-    df_submission = predict(model_url)
+    df_submission = predict(model_url,cfg_dataset,cfg_dataloader)
     print(df_submission)
     df_submission.to_csv('submission.csv',index=False)
