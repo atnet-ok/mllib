@@ -15,6 +15,7 @@ import pandas as pd
 import os
 import torchaudio
 from dllib.config import dataset_cfg,dataloader_cfg
+from glob import glob
 
 # https://qiita.com/tomp/items/3bf6d040bbc89a171880
 # https://qiita.com/yujimats/items/2078f98655d93e66af30
@@ -45,6 +46,8 @@ class Birdclef2024Dataset(Dataset):
             "mel_scale" : "slaney"
         }
 
+        self.phase = phase
+
         image_size = img_size
         top_db = 80
         train_period = 5
@@ -62,29 +65,14 @@ class Birdclef2024Dataset(Dataset):
 
         transform = self.get_transform(phase=phase,image_size=image_size)
         
-        df = pd.read_csv(os.path.join(root_dir,'birdclef-2024/train_metadata.csv'))
-        df["path"] = os.path.join(root_dir,"birdclef-2024/train_audio/") + df["filename"]
-        df["rating"] = np.clip(df["rating"] / df["rating"].max(), 0.1, 1.0)
-
-        skf = StratifiedKFold(n_splits=N_FOLD, random_state=0, shuffle=True)
-        df['fold'] = -1
-        for ifold, (train_idx, val_idx) in enumerate(skf.split(X=df, y=df["primary_label"].values)):
-            df.loc[val_idx, 'fold'] = ifold
-
+        df = self.load_dataset(phase,root_dir,fold,seed,N_FOLD=5)
+        self.df = df
+        
         sub = pd.read_csv(os.path.join(root_dir,"birdclef-2024/sample_submission.csv"))
         target_columns = sub.columns.tolist()[1:]
         num_classes = len(target_columns)
         bird2id = {b: i for i, b in enumerate(target_columns)}
 
-        if seed >= 0:
-            trn_df = df[df['fold'] != fold].reset_index(drop=True)
-            val_df = df[df['fold'] == fold].reset_index(drop=True)
-        else:
-            trn_df = df.reset_index(drop=True)
-            val_df = df[df['fold'] == fold].reset_index(drop=True)
-
-        self.df  = trn_df if phase == "train" else val_df
-        
         self.bird2id = bird2id
         self.num_classes = num_classes
         self.secondary_coef = secondary_coef
@@ -96,6 +84,34 @@ class Birdclef2024Dataset(Dataset):
 
     def __len__(self):
         return len(self.df)
+    
+    def load_dataset(self,phase,root_dir,fold,seed,N_FOLD=5):
+        if phase=="test":
+            filepath_s = glob(os.path.join(root_dir,'birdclef-2024/test_soundscapes/*.ogg'))
+            path_s = [os.path.join(root_dir,'birdclef-2024/test_soundscapes/',filepath) for filepath in filepath_s]
+            df = pd.DataFrame()
+            df["path"] = path_s
+            return df
+        
+        else:
+            df = pd.read_csv(os.path.join(root_dir,'birdclef-2024/train_metadata.csv'))
+            df["path"] = os.path.join(root_dir,"birdclef-2024/train_audio/") + df["filename"]
+            df["rating"] = np.clip(df["rating"] / df["rating"].max(), 0.1, 1.0)
+
+            skf = StratifiedKFold(n_splits=N_FOLD, random_state=0, shuffle=True)
+            df['fold'] = -1
+            for ifold, (train_idx, val_idx) in enumerate(skf.split(X=df, y=df["primary_label"].values)):
+                df.loc[val_idx, 'fold'] = ifold
+
+            if seed >= 0:
+                trn_df = df[df['fold'] != fold].reset_index(drop=True)
+                val_df = df[df['fold'] == fold].reset_index(drop=True)
+            else:
+                trn_df = df.reset_index(drop=True)
+                val_df = df[df['fold'] == fold].reset_index(drop=True)
+
+            return  trn_df if phase == "train" else val_df
+
 
     def get_transform(self,phase,image_size):
         transforms_train = A.Compose([
@@ -134,23 +150,31 @@ class Birdclef2024Dataset(Dataset):
         return mel_spectrogram
 
     def __getitem__(self, idx):
-        path = self.df["path"].iloc[idx]
-        primary_label = self.df["primary_label"].iloc[idx]
-        secondary_labels = self.df["secondary_labels"].iloc[idx]
-        rating = self.df["rating"].iloc[idx]
-
-        spec = self.prepare_spec(path)
-        target = self.prepare_target(primary_label, secondary_labels)
-
-        if self.transform is not None:
+        if self.phase == "test":
+            path = self.df["path"].iloc[idx]
+            spec = self.prepare_spec(path)
             res = self.transform(image=spec)
             spec = res['image'].astype(np.float32)
+            spec = spec.transpose(2, 0, 1)
+            return spec
+        
         else:
-            spec = spec.astype(np.float32)
+            path = self.df["path"].iloc[idx]
+            primary_label = self.df["primary_label"].iloc[idx]
+            secondary_labels = self.df["secondary_labels"].iloc[idx]
+            rating = self.df["rating"].iloc[idx]
 
-        spec = spec.transpose(2, 0, 1)
+            spec = self.prepare_spec(path)
+            target = self.prepare_target(primary_label, secondary_labels)
 
-        return {"spec": spec, "target": target, 'rating': rating}
+            if self.transform is not None:
+                res = self.transform(image=spec)
+                spec = res['image'].astype(np.float32)
+            else:
+                spec = spec.astype(np.float32)
+
+            spec = spec.transpose(2, 0, 1)
+            return {"spec": spec, "target": target, 'rating': rating}
 
 def normalize_melspec(X, eps=1e-6):
     mean = X.mean((1, 2), keepdim=True)

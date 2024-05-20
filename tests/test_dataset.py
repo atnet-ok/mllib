@@ -38,6 +38,19 @@ class TestAll(unittest.TestCase):
             #     print(y)
             #     break
 
-        
+    def test_test(self):
+
+        phase = "test"
+        cfg_dataset = dataset_cfg()
+        dataset = get_dataset(cfg_dataset,phase)
+
+        print(dataset.__len__())
+
+        for i in range(dataset.__len__()):
+            img = dataset.__getitem__(i)
+            print(img.shape)
+            print(img)
+
+
 if __name__ == '__main__':
     unittest.main()
