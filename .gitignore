@@ -2,6 +2,12 @@
 *.pyc
 test.py
 **/*.pkl
-expr/
-!expr/000_example/config
-!expr/000_example/main.py
+# expr/
+# !expr/000_example/config
+# !expr/000_example/main.py
+
+.log/
+.tmp/
+
+multirun
+outputs
