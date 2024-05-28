@@ -10,7 +10,6 @@ from dllib.config import *
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
-import numpy as np
 
 class Trainer(object):
     def __init__(
@@ -24,8 +23,8 @@ class Trainer(object):
         self.task = self.cfg.task
 
         self.model = get_model(self.cfg.model)
-        self.get_metrics, self.criterion = get_metrics(self.task)
-        self.best_score = 0
+        self.criterion, self.get_score, self.is_best_model = get_metrics(self.task)
+        self.best_score = None
 
         self.optimizer, self.scheduler, self.model = get_optimizer(
             self.cfg.optimizer, 
@@ -39,8 +38,6 @@ class Trainer(object):
 
         self.model = self.model.to(self.device)
         self.criterion = self.criterion.to(self.device)
-        #self.model = torch.compile(self.model) #for pytorch 2.0
-
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
 
     def _load_data(self):
@@ -85,9 +82,9 @@ class Trainer(object):
             y_pred.extend(list(y.detach().cpu().numpy()))
 
         loss = loss/num_batches
-        metrics = self.get_metrics(y_pred, y_true)
+        score = self.get_score(y_pred, y_true)
 
-        return metrics, loss
+        return score, loss
 
     def train(self):
 
@@ -99,84 +96,15 @@ class Trainer(object):
             print(f"Epoch {epoch+1}")
 
             for phase in ["train", "eval"]:
-                metrics, loss = self._update(dl_dct[phase], phase, epoch)
+                score, loss = self._update(dl_dct[phase], phase, epoch)
                 print(f"loss/{phase}:{loss}")
-                print(f"metrics/{phase}:{metrics}")
+                print(f"score/{phase}:{score}")
                 self.logger.log_metrics({f"loss/{phase}":loss},step=epoch)
-                self.logger.log_metrics({f"metrics/{phase}":metrics},step=epoch)
+                self.logger.log_metrics({f"metrics/{phase}":score},step=epoch)
 
-            if metrics>self.best_score:
-                self.best_score = metrics
+            if self.is_best_model(self.best_score, score):
                 print("best model ever!")
                 self.logger.log_model(model=self.model,model_name="model_best")
 
         self.logger.log_model(model=self.model,model_name="model_last")
 
-    def test(self):
-        dataset_test = get_dataset(self.cfg.model, phase='test')
-        dl_test = get_dataloader(dataset_test, self.cfg.model, 'test')
-        metrics, loss = self._update( dl_test, 'test')
-
-def mixup(data, targets, alpha):
-    indices = torch.randperm(data.size(0))
-    data2 = data[indices]
-    targets2 = targets[indices]
-
-    lam = torch.FloatTensor([np.random.beta(alpha, alpha)])
-    data = data * lam + data2 * (1 - lam)
-    targets = targets * lam + targets2 * (1 - lam)
-
-    return data, targets
-
-class MixupTrainer(Trainer):
-
-    def __init__(self, trainer_cfg: trainer_cfg = trainer_cfg(), logger: Logger = Logger()) -> None:
-        super().__init__(trainer_cfg, logger)
-
-    def _update(self, dataloader:DataLoader ,phase:str='train', epoch:int =None) -> dict:
-
-        if phase == 'train':
-            self.model.train()
-        else:
-            self.model.eval()
-
-        loss = 0
-        y_true = []
-        y_pred = []
-
-        num_batches = len(dataloader)
-
-        for data in tqdm(dataloader):
-
-            spec = data['spec']
-            target = data['target']
-            if (phase == "train") and self.cfg.mix_up:
-                spec, target = mixup(spec, target, 0.5)
-
-            self.optimizer.zero_grad()
-            spec=spec.to(torch.float32).to(self.device)
-            target=target.to(torch.float32).to(self.device)
-
-            with torch.set_grad_enabled(phase == 'train'):
-                with torch.cuda.amp.autocast(
-                    enabled=(self.amp and (phase == 'train'))
-                    ):
-                    y = self.model(spec)
-                    loss_t = self.criterion(y,target)
-
-            if phase == 'train':
-                self.scaler.scale(loss_t).backward()
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-                self.scheduler.step(epoch+1)
-                lr = self.optimizer.param_groups[0]["lr"]
-                self.logger.log_metrics({"learning_rate":lr},step=epoch)
-
-            loss += loss_t.item()
-            y_true.extend(list(target.detach().cpu().numpy()))
-            y_pred.extend(list(y.detach().cpu().numpy()))
-
-        loss = loss/num_batches
-        metrics = self.get_metrics(y_pred, y_true,phase) 
-
-        return metrics, loss

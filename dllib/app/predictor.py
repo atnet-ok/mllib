@@ -11,10 +11,6 @@ def predict(model_url,cfg_dataset,cfg_dataloader):
     phase = "test"
     device = "cuda:0"
 
-    # Load model as a PyFuncModel.
-    # mlflow.set_tracking_uri(log_uri)
-    # model = mlflow.pyfunc.load_model(model_url)
-    # model = model.to(device)
 
     model = torch.load(model_url)
 

@@ -29,27 +29,11 @@ class TestAll(unittest.TestCase):
             output_ = dataset.__getitem__(0)
             print(output_  )
 
-            print(dataset.target_columns)
-            print(dataset.bird2id)
-
-            # dataloader = get_dataloader(dataset,cfg_dataloader,phase)
-            # for x,y in dataloader:
-            #     print(x.shape)
-            #     print(y)
-            #     break
-
-    def test_test(self):
-
-        phase = "test"
-        cfg_dataset = dataset_cfg()
-        dataset = get_dataset(cfg_dataset,phase)
-
-        print(dataset.__len__())
-
-        for i in range(dataset.__len__()):
-            img = dataset.__getitem__(i)
-            print(img.shape)
-            print(img)
+            dataloader = get_dataloader(dataset,cfg_dataloader,phase)
+            for x,y in dataloader:
+                print(x.shape)
+                print(y)
+                break
 
 
 if __name__ == '__main__':
