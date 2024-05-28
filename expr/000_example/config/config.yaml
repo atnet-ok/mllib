@@ -13,6 +13,7 @@ trainer:
     scheduler: cosine_warmup
     warmup_t_rate: 0.12
     warmup_lr_init_rate: 0.1
+    custom: {}
   dataset:
     name: MNIST
     eval_rate: 0.2
@@ -26,11 +27,13 @@ trainer:
     pre_train: true
     in_chans: 1
     out_dim: 10
+    custom: {}
   dataloader:
     batch_size_train: 128
     batch_size_eval: 128
     num_workers: 8
+  custom: {}
 logger:
-  log_uri: /mnt/d/log/test/mlruns
+  log_uri: /.tmp/mlruns
   experiment_name: 000_test_expr
   run_name: test_run
