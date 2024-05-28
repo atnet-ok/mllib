@@ -4,12 +4,7 @@ from dllib.domain.dataset import get_dataset, get_dataloader
 
 # python -m unittest tests.test_dataset
 
-class TestAll(unittest.TestCase):
-
-    # def __init__(self, methodName: str = "runTest") -> None:
-    #     super().__init__(methodName)
-    #     self.cfg = None
-    #     self.logger = None
+class TestDataset(unittest.TestCase):
 
     def setUp(self):
         pass

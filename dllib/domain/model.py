@@ -38,5 +38,7 @@ def get_model(model_cfg:model_cfg):
             in_chans=model_cfg.in_chans,
             out_dim=model_cfg.out_dim
             )
-    
+    else:
+        raise Exception(f'{model_cfg.name} in not implemented')    
+
     return model

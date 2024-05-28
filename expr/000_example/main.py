@@ -10,7 +10,7 @@ from omegaconf import OmegaConf
 from dataclasses import dataclass
 
 from dllib.config import trainer_cfg,logger_cfg
-from dllib.app.trainer import MixupTrainer
+from dllib.app.trainer import get_trainer
 from dllib.common.logger import Logger
 from dllib.common.utils import date2str,fix_randomness
 
@@ -32,7 +32,7 @@ def main(cfg:config) -> None:
     logger = Logger(logger_cfg=cfg.logger)
     logger.log_config(OmegaConf.to_container(cfg.trainer))
 
-    trainer = MixupTrainer(trainer_cfg=cfg.trainer,logger=logger)
+    trainer = get_trainer(trainer_cfg=cfg.trainer,logger=logger)
     trainer.train()
 
 if __name__ == "__main__":

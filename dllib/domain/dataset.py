@@ -15,7 +15,7 @@ import pandas as pd
 import os
 import torchaudio
 from dllib.config import dataset_cfg,dataloader_cfg
-from glob import glob
+from dllib.domain.preprocess import preprocess_gray_image 
 
 # https://qiita.com/tomp/items/3bf6d040bbc89a171880
 # https://qiita.com/yujimats/items/2078f98655d93e66af30
@@ -41,10 +41,7 @@ class MNIST_(Dataset):
         )
 
     def get_preprocesser(self):
-        transform  = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])
+        transform  = preprocess_gray_image
         return  transform 
 
     def __len__(self):
@@ -74,7 +71,6 @@ def get_dataset(dataset_cfg:dataset_cfg,phase:str):
     
     else:
         raise Exception(f'{dataset_cfg.name} in not implemented')
-
 
 
 def get_dataloader(

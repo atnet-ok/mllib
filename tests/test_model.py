@@ -5,12 +5,7 @@ from dllib.domain.model import get_model
 
 # python -m unittest tests.test_model
 
-class TestAll(unittest.TestCase):
-
-    # def __init__(self, methodName: str = "runTest") -> None:
-    #     super().__init__(methodName)
-    #     self.cfg = None
-    #     self.logger = None
+class TestModel(unittest.TestCase):
 
     def setUp(self):
         pass

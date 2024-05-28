@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from dllib.common.utils import *
 
 @dataclass
@@ -8,7 +8,7 @@ class model_cfg:
     pre_train:bool =True
     in_chans:int=1
     out_dim:int=10
-    custom = None
+    custom:dict = field(default_factory = dict)
 
 @dataclass
 class dataset_cfg:
@@ -16,7 +16,7 @@ class dataset_cfg:
     eval_rate:float= 0.2
     root_dir:str="/mnt/d/data/"
     fold:int=0
-    custom = {"class_num":10}
+    custom:dict = field(default_factory = lambda:{"class_num":10})
 
 @dataclass
 class dataloader_cfg:
@@ -33,12 +33,13 @@ class optimizer_cfg:
     scheduler:str="cosine_warmup"
     warmup_t_rate:float=0.12
     warmup_lr_init_rate:float=0.1
-    custom = None
+    custom:dict = field(default_factory = dict)
 
 @dataclass
 class trainer_cfg:
+    name:str="BasicTrainer"
     seed:int=42
-    epoch:int=25
+    epoch:int=3
     device:str="cuda:0"
     amp:bool=True
     task:str = "classification"
@@ -46,7 +47,15 @@ class trainer_cfg:
     dataset:dataset_cfg=dataset_cfg()
     model:model_cfg=model_cfg()
     dataloader:dataloader_cfg=dataloader_cfg()
-    custom = None
+    custom:dict = field(default_factory = dict)
+
+@dataclass
+class predictor_cfg:
+    seed:int=42
+    device:str="cuda:0"
+    model_path:str="/mnt/d/log/test/mlruns/866575222639173939/4b6d1c353e4647fb83f5ba21a4d3eda4/artifacts/model_best/data/model.pth"
+    custom:dict = field(default_factory = dict)
+
 
 @dataclass
 class logger_cfg:

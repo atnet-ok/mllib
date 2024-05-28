@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
 
-class Trainer(object):
+class BasicTrainer(object):
     def __init__(
             self, 
             trainer_cfg:trainer_cfg=trainer_cfg(), 
@@ -46,7 +46,7 @@ class Trainer(object):
         self.dataloader_train = get_dataloader(self.dataset_train,self.cfg.dataloader, 'train')
         self.dataloader_eval = get_dataloader(self.dataset_eval,self.cfg.dataloader, 'eval')
         
-    def _update(self, dataloader:DataLoader ,phase:str='train', epoch:int =None) -> dict:
+    def _step(self, dataloader:DataLoader ,phase:str='train', epoch:int =None) -> dict:
 
         if phase == 'train':
             self.model.train()
@@ -96,7 +96,7 @@ class Trainer(object):
             print(f"Epoch {epoch+1}")
 
             for phase in ["train", "eval"]:
-                score, loss = self._update(dl_dct[phase], phase, epoch)
+                score, loss = self._step(dl_dct[phase], phase, epoch)
                 print(f"loss/{phase}:{loss}")
                 print(f"score/{phase}:{score}")
                 self.logger.log_metrics({f"loss/{phase}":loss},step=epoch)
@@ -108,3 +108,11 @@ class Trainer(object):
 
         self.logger.log_model(model=self.model,model_name="model_last")
 
+def get_trainer(trainer_cfg:trainer_cfg=trainer_cfg(),logger:Logger=Logger()):
+    if trainer_cfg.name == "BasicTrainer":
+        trainer = BasicTrainer(trainer_cfg,logger)
+
+    else:
+        raise Exception(f'{trainer_cfg.name} in not implemented')
+
+    return trainer

@@ -8,7 +8,7 @@ import pandas as pd
 def get_metrics(task):
 
     if task == "classification":
-        criterion = nn.BCELoss()
+        criterion =  nn.BCEWithLogitsLoss()
         get_score = get_classification_score
         is_best_model = is_highest_accuracy
     
