@@ -1,7 +1,7 @@
 import unittest
-from src.config import dataset_cfg
-# from src.manager import *
-# from src.app.trainer import *
+from dllib.config import dataset_cfg, dataloader_cfg
+from dllib.domain.dataset import get_dataset, get_dataloader
+
 # python -m unittest tests.test_dataset
 
 class TestAll(unittest.TestCase):
@@ -17,44 +17,39 @@ class TestAll(unittest.TestCase):
     def tearDown(self):
         pass
 
-    # def test_cfg(self):
-    #     cfg = get_config("config/000_default.yaml")
-    #     self.assertEqual(cfg.model.name, 'tf_efficientnet_b7')
-
     #@unittest.skip('skipped')
     def test_dataset(self):
-        dataset_cfg = dataset_cfg()
-        dataset_train = get_dataset(cfg, phase='train')
-        dataset_eval  = get_dataset(cfg, phase='eval')
-        print(dataset_train.__len__())
-        print(dataset_train.__getitem__(0))
-        print(dataset_eval.__len__())
-        print(dataset_eval.__getitem__(0))
 
-        dl_train = get_dataloader(self.cfg, 'train',dataset_train)
-        dl_eval = get_dataloader(self.cfg, 'eval',dataset_eval)
+        cfg_dataset = dataset_cfg()
+        cfg_dataloader = dataloader_cfg()
 
-    # @unittest.skip('skipped')
-    # def test_model(self):
-    #     cfg = get_config("config/000_default.yaml")
-    #     model = get_model(cfg)
-    #     print(model)
+        for phase in ["train","eval"]:
+            dataset = get_dataset(cfg_dataset,phase)
+            print(dataset.__len__())
+            output_ = dataset.__getitem__(0)
+            print(output_  )
 
-    # @unittest.skip('skipped')
-    # def test_trainer(self):
-    #     class args:
-    #          experiment_name = "000_test"
-    #          run_name = '000_default'
-    #          mode = 'train'
-    #          cfg_dir = "config/"
-    #          model_dir = "model/"
-    #          log_dir = "log/"
-    #     manager = Manager(args)
-    #     cfg, logger = manager.set_experiment()
+            print(dataset.target_columns)
+            print(dataset.bird2id)
 
-    #     trainer = get_trainer(cfg, logger)
-    #     trainer.train()
- 
+            # dataloader = get_dataloader(dataset,cfg_dataloader,phase)
+            # for x,y in dataloader:
+            #     print(x.shape)
+            #     print(y)
+            #     break
+
+    def test_test(self):
+
+        phase = "test"
+        cfg_dataset = dataset_cfg()
+        dataset = get_dataset(cfg_dataset,phase)
+
+        print(dataset.__len__())
+
+        for i in range(dataset.__len__()):
+            img = dataset.__getitem__(i)
+            print(img.shape)
+            print(img)
 
 
 if __name__ == '__main__':

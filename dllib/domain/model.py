@@ -1,14 +1,13 @@
 from torch import nn
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
 import torch.nn.functional as F
 import timm
 import torch
+import numpy as np
+
+from dllib.config import model_cfg
 
 class TimmClassifier(nn.Module):
-    def __init__(self, model_name, class_num, pre_train,in_chans):
+    def __init__(self, model_name, out_dim, pre_train,in_chans):
         super(TimmClassifier, self).__init__()
 
         # for timm
@@ -20,13 +19,13 @@ class TimmClassifier(nn.Module):
         )
         in_features = self.backbone.num_features
 
-        self.head = nn.Linear(in_features, class_num)
+        self.head = nn.Linear(in_features, out_dim)
 
     def forward(self, x):
         features = self.backbone(x)
         y = self.head(features)
 
-        return y, features
+        return y
 
 class TestNet(nn.Module):
     def __init__(self):
@@ -221,40 +220,56 @@ class UNet(nn.Module):
         x = torch.sigmoid(x)
         return x
 
-def get_model(cfg):
-    if cfg.train.name == 'DLTrainer':
-        if cfg.model.name in timm.list_models()+timm.list_models(pretrained=True):
-            model = TimmClassifier(
-                model_name = cfg.model.name,
-                class_num = cfg.data.class_num,
-                pre_train = cfg.model.pre_train,
-                in_chans = cfg.model.in_chans
-                )
-        elif cfg.model.name=="TestNet":
-            model = TestNet()
-        elif cfg.model.name=="UNet":
-            model = UNet()
-        elif cfg.model.name=="CNN1d":
-            model = CNN1d(
-                input_channels=cfg.model.in_chans, 
-                num_classes=cfg.data.class_num
-                )
-        else:
-            raise Exception(f'{cfg.model.name} in not implemented')
 
-    elif cfg.train.name in ['MLTrainer', 'MLSDATrainer']:
-        if cfg.model.name == "RandomForestClassifier":
-            model = RandomForestClassifier()
-        elif cfg.model.name == "SVC":
-            model = SVC()
-        elif cfg.model.name == "GradientBoostingClassifier":
-            model = GradientBoostingClassifier(
-                verbose=1
-            )
-        elif cfg.model.name == "LogisticRegression":
-            model = LogisticRegression(
-                penalty='l2'
-            )
-        else:
-            raise Exception(f'{cfg.model.name} in not implemented')      
+class GeM(torch.nn.Module):
+    def __init__(self, p=3, eps=1e-6):
+        super(GeM, self).__init__()
+        self.p = torch.nn.Parameter(torch.ones(1) * p)
+        self.eps = eps
+
+    def forward(self, x):
+        bs, ch, h, w = x.shape
+        x = torch.nn.functional.avg_pool2d(x.clamp(min=self.eps).pow(self.p), (x.size(-2), x.size(-1))).pow(
+            1.0 / self.p)
+        x = x.view(bs, ch)
+        return x
+
+
+class CNN(torch.nn.Module):
+    def __init__(self, backbone, pretrained, num_classes):
+        super().__init__()
+
+        out_indices = (3, 4)
+        self.backbone = timm.create_model(
+            backbone,
+            features_only=True,
+            pretrained=pretrained,
+            in_chans=3,
+            num_classes=num_classes,
+            out_indices=out_indices,
+        )
+        feature_dims = self.backbone.feature_info.channels()
+        print(f"feature dims: {feature_dims}")
+
+        self.global_pools = torch.nn.ModuleList([GeM() for _ in out_indices])
+        self.mid_features = np.sum(feature_dims)
+        self.neck = torch.nn.BatchNorm1d(self.mid_features)
+        self.head = torch.nn.Linear(self.mid_features, num_classes)
+
+    def forward(self, x):
+        ms = self.backbone(x)
+        h = torch.cat([global_pool(m) for m, global_pool in zip(ms, self.global_pools)], dim=1)
+        x = self.neck(h)
+        x = self.head(x)
+        return x
+
+
+def get_model(model_cfg:model_cfg):
+
+    model = CNN(
+        backbone=model_cfg.backbone, 
+        pretrained=model_cfg.pre_train,
+        num_classes=model_cfg.out_dim
+        )
+    
     return model
