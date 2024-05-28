@@ -6,7 +6,7 @@ test.py
 # !expr/000_example/config
 # !expr/000_example/main.py
 
-.log/
+log/
 .tmp/
 
 multirun

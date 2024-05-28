@@ -34,7 +34,6 @@ def main(cfg:config) -> None:
     trainer.train()
 
 if __name__ == "__main__":
-
     cfg = config()
     OmegaConf.save(cfg, 'config/config.yaml')
     main()

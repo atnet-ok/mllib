@@ -53,13 +53,13 @@ class trainer_cfg:
 class predictor_cfg:
     seed:int=42
     device:str="cuda:0"
-    model_path:str="/.tmp/mlruns/data/model.pth"
+    model_path:str="log/mlruns/data/model.pth"
     custom:dict = field(default_factory = dict)
 
 
 @dataclass
 class logger_cfg:
-    log_uri:str="/.tmp/mlruns"
+    log_uri:str="log/mlruns"
     experiment_name:str="000_test_expr"
     run_name:str="test_run"
 
