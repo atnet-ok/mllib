@@ -57,6 +57,9 @@ def get_optimizer(optimizer_cfg:optimizer_cfg,model,epoch_n=40):
             weight_decay=weight_decay, 
             momentum=momentum, 
             centered=False)
+        
+    else:
+        raise Exception(f'{opt} in not implemented')    
 
     sche = optimizer_cfg.scheduler
     sche_cycle = epoch_n #optimizer_cfg.sche_cycle
