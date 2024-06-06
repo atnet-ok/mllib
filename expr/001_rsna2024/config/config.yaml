@@ -1,0 +1,39 @@
+trainer:
+  name: BasicTrainer
+  seed: 42
+  epoch: 3
+  device: cuda:0
+  amp: true
+  task: classification
+  optimizer:
+    name: adam
+    lr: 0.0004
+    wd: 1.0e-06
+    momentum: 0.9
+    scheduler: cosine_warmup
+    warmup_t_rate: 0.12
+    warmup_lr_init_rate: 0.1
+    custom: {}
+  dataset:
+    name: MNIST
+    eval_rate: 0.2
+    root_dir: /mnt/d/data/
+    fold: 0
+    custom:
+      class_num: 10
+  model:
+    name: TimmClassifier
+    backbone: tf_efficientnet_b7
+    pre_train: true
+    in_chans: 1
+    out_dim: 10
+    custom: {}
+  dataloader:
+    batch_size_train: 128
+    batch_size_eval: 128
+    num_workers: 8
+  custom: {}
+logger:
+  log_uri: log/mlruns
+  experiment_name: 000_test_expr
+  run_name: test_run

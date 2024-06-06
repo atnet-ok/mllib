@@ -6,22 +6,21 @@ from torch import nn
 
 # python -m unittest tests.test_optimizer
 
-class TestOptimizer(unittest.TestCase):
 
+class TestOptimizer(unittest.TestCase):
     def setUp(self):
         pass
 
     def tearDown(self):
         pass
 
-    #@unittest.skip('skipped')
+    # @unittest.skip('skipped')
     def test_optimizer(self):
-
         cfg = optimizer_cfg()
 
         model = nn.Linear(12 * 12 * 64, 128)
 
-        optimizer, scheduler, model = get_optimizer(cfg,model)
+        optimizer, scheduler, model = get_optimizer(cfg, model)
 
         lrs = []
         for epoch in range(1, 100):
@@ -31,6 +30,6 @@ class TestOptimizer(unittest.TestCase):
         plt.plot(range(len(lrs)), lrs)
         plt.savefig(".tmp/lr_hist")
 
-        
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
