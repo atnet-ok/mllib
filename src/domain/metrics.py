@@ -15,7 +15,7 @@ def get_metrics(task):
     if task == "classification":
         criterion = nn.BCEWithLogitsLoss()
         get_score = get_classification_score
-        is_best_model = is_highest_accuracy
+        is_best_model = lambda best_score, score_dct: is_highest_accuracy(best_score, score_dct["accuracy"])
 
     elif task == "generation":
         criterion = nn.MSELoss()
@@ -53,7 +53,9 @@ def get_classification_score(y_pred, y_true):
 
     accuracy = accuracy_score(cls_true, cls_pred)
 
-    return accuracy
+    score_dct = {"accuracy":accuracy}
+
+    return score_dct
 
 
 def is_highest_accuracy(best_score, score):

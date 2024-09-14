@@ -54,6 +54,8 @@ class BasicTrainer(object):
         else:
             self.model.eval()
 
+        loss_dct = {}
+
         loss = 0
         y_true = []
         y_pred = []
@@ -81,9 +83,11 @@ class BasicTrainer(object):
             y_pred.extend(list(y.detach().cpu().numpy()))
 
         loss = loss / num_batches
-        score = self.get_score(y_pred, y_true)
+        loss_dct.update({"loss_total":loss})
 
-        return score, loss
+        score_dct = self.get_score(y_pred, y_true)
+
+        return score_dct, loss_dct
 
     def train(self):
         self._load_data()
@@ -94,13 +98,17 @@ class BasicTrainer(object):
             print(f"Epoch {epoch+1}")
 
             for phase in ["train", "eval"]:
-                score, loss = self._step(dl_dct[phase], phase, epoch)
-                print(f"loss/{phase}:{loss}")
-                print(f"score/{phase}:{score}")
-                self.logger.log_metrics({f"loss/{phase}": loss}, step=epoch)
-                self.logger.log_metrics({f"metrics/{phase}": score}, step=epoch)
+                score_dct, loss_dct = self._step(dl_dct[phase], phase, epoch)
 
-            if self.is_best_model(self.best_score, score):
+                for key,value in score_dct.items():
+                    print(f"{key}/{phase}:{value}")
+                    self.logger.log_metrics({f"{key}/{phase}": value}, step=epoch)
+
+                for key,value in loss_dct.items():
+                    print(f"{key}/{phase}:{value}")
+                    self.logger.log_metrics({f"{key}/{phase}": value}, step=epoch)
+
+            if self.is_best_model(self.best_score, score_dct):
                 print("best model ever!")
                 self.logger.log_model(model=self.model, model_name="model_best")
 

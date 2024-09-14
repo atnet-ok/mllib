@@ -18,7 +18,12 @@ class dataset_cfg:
     eval_rate: float = 0.2
     root_dir: str = "/mnt/d/data/rsna-2024-lumbar-spine-degenerative-classification/"
     fold: int = 0
-    custom: dict = field(default_factory=lambda: {"class_num": 10})
+    custom: dict = field(
+        default_factory=lambda: 
+        {
+            "class_num": 10,
+         }
+        )
 
 
 @dataclass
