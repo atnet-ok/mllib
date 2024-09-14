@@ -1,7 +1,7 @@
 import unittest
 import torch
-from dllib.config import model_cfg
-from dllib.domain.model import get_model
+from src.config import model_cfg
+from src.domain.model import get_model
 
 # python -m unittest tests.test_model
 

@@ -1,6 +1,6 @@
 import unittest
-from dllib.config import trainer_cfg
-from dllib.app.trainer import get_trainer
+from src.config import trainer_cfg
+from src.app.trainer import get_trainer
 
 # python -m unittest tests.test_trainer
 

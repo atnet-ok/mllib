@@ -1,6 +1,6 @@
 import unittest
-from dllib.config import optimizer_cfg
-from dllib.common.optimizer import get_optimizer
+from src.config import optimizer_cfg
+from src.common.optimizer import get_optimizer
 import matplotlib.pyplot as plt
 from torch import nn
 

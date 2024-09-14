@@ -9,10 +9,10 @@ import hydra
 from omegaconf import OmegaConf
 from dataclasses import dataclass
 
-from dllib.config import trainer_cfg, logger_cfg
-from dllib.app.trainer import get_trainer
-from dllib.common.logger import Logger
-from dllib.common.utils import date2str, fix_randomness
+from src.config import trainer_cfg, logger_cfg
+from src.app.trainer import get_trainer
+from src.common.logger import Logger
+from src.common.utils import date2str, fix_randomness
 
 
 @dataclass

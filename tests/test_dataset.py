@@ -1,6 +1,6 @@
 import unittest
-from dllib.config import dataset_cfg, dataloader_cfg
-from dllib.domain.dataset import get_dataset, get_dataloader
+from src.config import dataset_cfg, dataloader_cfg
+from src.domain.dataset import get_dataset, get_dataloader
 
 # python -m unittest tests.test_dataset
 
