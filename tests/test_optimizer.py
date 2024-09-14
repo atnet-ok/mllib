@@ -2,6 +2,7 @@ import unittest
 from src.config import optimizer_cfg
 from src.common.optimizer import get_optimizer
 import matplotlib.pyplot as plt
+import os
 from torch import nn
 
 # python -m unittest tests.test_optimizer
@@ -28,6 +29,7 @@ class TestOptimizer(unittest.TestCase):
             lrs.append(optimizer.param_groups[0]["lr"])
 
         plt.plot(range(len(lrs)), lrs)
+        os.makedirs(".tmp",exist_ok=True)
         plt.savefig(".tmp/lr_hist")
 
 

@@ -4,7 +4,6 @@ from src.app.trainer import get_trainer
 
 # python -m unittest tests.test_trainer
 
-
 class TestTrainer(unittest.TestCase):
     def setUp(self):
         pass
@@ -17,7 +16,6 @@ class TestTrainer(unittest.TestCase):
         cfg_trainer = trainer_cfg()
         trainer = get_trainer(cfg_trainer)
         trainer.train()
-
 
 if __name__ == "__main__":
     unittest.main()
